@@ -158,7 +158,7 @@ def start_message(message):
         bot.delete_message(id_, t.message_id)
 
     def doc(document):
-        if document is not None:
+        if document is not None and document != '':
             bot.send_message(id_, document)
 
     remove_markup()
@@ -203,7 +203,7 @@ def send_text(message):
     id_ = message.chat.id
     name = message.chat.first_name
     login = message.chat.username
-    print('{0} wrote {1}'.format(name, text))
+    print('receiving {0} from {1}'.format(text, name))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
     try:
@@ -221,7 +221,7 @@ def send_text(message):
         bot.send_message(id_, message, reply_markup=markup)
 
     def doc(document):
-        if document is not None:
+        if document is not None and document != '':
             for d in document.split():
                 bot.send_document(id_, d)
 
@@ -328,10 +328,10 @@ def send_text(message):
                         txt = text[text.find('Текст: ') + 7:]
                         event = db.get_event_by_id(num)
                         event.text = txt
-                        if event.type is 0:
+                        if event.type == 0:
                             event.datetime.replace(year=nums[1])
                             event.number = nums[2]
-                        elif event.type is 1:
+                        elif event.type == 1:
                             event.datetime.replace(year=nums[1])
                             event.datetime.replace(hour=nums[2])
                             event.datetime.replace(minute=nums[3])
@@ -354,7 +354,7 @@ def send_text(message):
             elif text == 'Покажи недавние другие сообщения':
                 events = db.all_events()
                 for event in events:
-                    if event.type is 2:
+                    if event.type == 2:
                         msg('№ {0}\nДень месяца и время: {1}\nТекст: {2}'.
                             format(event.id_, event.datetime.strftime('%d %H %M'), event.text))
                         doc(event.attachment)
@@ -376,12 +376,12 @@ def send_text(message):
             events = db.all_events()
             for event in events:
                 if day == event.day:
-                    if event.type is 1:
+                    if event.type == 1:
                         msg('№ {0}\nНомер дня и время {1} {2}\nТекст: {3}'.
                             format(event.id_, str(int(event.datetime.strftime('%Y'))), event.datetime.strftime('%H %M'),
                                    event.text))
                         doc(event.attachment)
-                    if event.type is 0:
+                    if event.type == 0:
                         msg('№ {0}\nНомер дня и порядковый номер {1} {2}\nТекст: {3}'.
                             format(event.id_, str(int(event.datetime.strftime('%Y'))), event.number, event.text))
                         doc(event.attachment)
@@ -395,11 +395,18 @@ def send_text(message):
         if user.stage == 6:
             txt = text.split(sep='\n')
             user = db.get_user_by_login(txt[0])
-            bot.send_message(user.chat_id, txt[1])
-            if document is not '':
-                bot.send_document(user.chat_id, document)
-            msg('Сообщение отправлено. Продолжайте отвечать пользователям, либо введите /start, чтобы '
-                'вернуться в главное меню.')
+            for i in range(2, len(txt)):
+                txt[1] += '\n' + txt[i]
+            try:
+                bot.send_message(user.chat_id, txt[1])
+                if document is not None and document != '':
+                    bot.send_document(user.chat_id, document)
+                msg('Сообщение отправлено. Продолжайте отвечать пользователям, либо введите /start, чтобы '
+                    'вернуться в главное меню.')
+            except Exception as e:
+                print(e)
+                msg('Неверный формат ввода. Введите логин пользователя и сообщение в следующей строке, либо введите '
+                    '/start, чтобы вернуться в главное меню.')
             return
 
         # add link
@@ -442,7 +449,7 @@ def send_text(message):
             db.delete_messages()
             msg('Пользователи отправили {0} новых сообщений'.format(len(messages)))
             for m in messages:
-                msg('{0} в {1} написал:{2}'.format(m.login, m.datetime, m.text))
+                msg('{0} в {1} написал:\n{2}'.format(m.login, m.datetime, m.text))
             msg('Чтобы ответить, введите логин пользователя и сообщение в следующей строке, либо введите /start, чтобы '
                 'вернуться в главное меню.')
             user.stage = 6
@@ -552,7 +559,7 @@ def send_text(message):
         threading.Thread(target=after_settings(user)).start()
         return
     # сообщение
-    elif user.stage is 5:
+    elif user.stage == 5:
         db.add_message(Chat.Message(login, text, document))
         msg('Сообщение отправлено. Ожидайте ответа.')
 

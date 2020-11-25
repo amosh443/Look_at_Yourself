@@ -19,6 +19,7 @@ bot = telebot.TeleBot(token)
 def msg(user, message):
     all_links()
     markup = InlineKeyboardMarkup(True)
+    print('sending {0} to {1}'.format(message, user.login))
     for link in links:
 
         if link.name in message:
