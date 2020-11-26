@@ -556,6 +556,7 @@ def send_text(message):
         t = list(user.done)
         t[day] = '1'
         user.done = ''.join(t)
+        user.stage = 2
         msg('Отчет принят! Продолжайте в том же духе!')
         f = open('puzzles/{0} {1}.jpg'.format((day - 1) // 7 + 1, day % 7 if day % 7 != 0 else 7), 'rb')
         doc(f)
