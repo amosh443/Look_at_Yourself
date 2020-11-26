@@ -106,27 +106,14 @@ def after_settings(user):
 
 @bot.callback_query_handler(lambda query: query.data == 'done')
 def process_callback_1(query):
-    bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
+    #bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
     user = db.get_user_by_login(query.message.chat.username)
     day = (dt.datetime.utcnow() - user.start).days
-    day = 7
     if user.done[day] == '0':
-        t = list(user.done)
-        t[day] = '1'
-        user.done = ''.join(t)
-        bot.send_message(query.message.chat.id, 'Отчет принят! Продолжайте в том же духе!')
-        f = open('puzzles/{0} {1}.jpg'.format(day // 7 + 1, day % 7 + 1), 'rb')
-        bot.send_document(query.message.chat.id, f)
+        user.stage = 6
         db.update_user(user)
-        if day % 7 == 0:
-            for i in range(day - 7 + 1, day + 1):
-                if user.done[i] == '0':
-                    break
-                if i == day:
-                    bot.send_message(query.message.chat.id, 'Поздравляю! Вы выполняли Самоотчет в течение недели и '
-                                                            'собрали картину.')
-                    f = open('puzzles/{0}.jpg'.format(day // 7 + 1), 'rb')
-                    bot.send_document(query.message.chat.id, f)
+    else:
+        bot.send_message(query.message.chat.id, 'Самоотчет выполняется только раз в день.')
 
 
 @bot.callback_query_handler(lambda query: query.data == 'link')
@@ -203,7 +190,7 @@ def send_text(message):
     id_ = message.chat.id
     name = message.chat.first_name
     login = message.chat.username
-    print('receiving {0} from {1}'.format(text, name))
+    print('receiving {0} from {1} at {2}'.format(text, name, dt.datetime.now()))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
     try:
@@ -561,7 +548,26 @@ def send_text(message):
     # сообщение
     elif user.stage == 5:
         db.add_message(Chat.Message(login, text, document))
-        msg('Сообщение отправлено. Ожидайте ответа.')
+        msg('Сообщение отправлено. Ожидайте ответа. Вы можете написать еще одно, либо выйти в главное меню, '
+            'нажав /start')
+
+    elif user.stage == 6:
+        day = (dt.datetime.utcnow() - user.start).days
+        t = list(user.done)
+        t[day] = '1'
+        user.done = ''.join(t)
+        msg('Отчет принят! Продолжайте в том же духе!')
+        f = open('puzzles/{0} {1}.jpg'.format((day - 1) // 7 + 1, day % 7 if day % 7 != 0 else 7), 'rb')
+        doc(f)
+        db.update_user(user)
+        if day % 7 == 0:
+            for i in range(day - 7 + 1, day + 1):
+                if user.done[i] == '0':
+                    break
+                if i == day:
+                    msg('Поздравляю! Вы выполняли Самоотчет в течение недели и собрали картину.')
+                    f = open('puzzles/{0}.jpg'.format(day // 7), 'rb')
+                    doc(f)
 
     if text == 'Настройки':
         markup = types.ReplyKeyboardMarkup(True, True)
