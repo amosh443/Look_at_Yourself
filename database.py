@@ -25,7 +25,7 @@ def msg(user, message):
         if link.name in message:
             markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name), callback_data='link'))
     if 'Самоотчёт' in message:
-        markup.add(InlineKeyboardButton('✅Выполнено', callback_data='done'))
+        markup.add(InlineKeyboardButton('📝Отправить самоотчет', callback_data='done'))
     bot.send_message(user.chat_id, message, reply_markup=markup)
 
 
