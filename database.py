@@ -30,8 +30,11 @@ def msg(user, message):
 
 
 def doc(user, documents):
-    for f in documents.split():
-        bot.send_message(user.chat_id, f)
+    for d in documents.split():
+        try:
+            bot.send_photo(user.chat_id, d)
+        except Exception as e:
+            bot.send_document(user.chat_id, d)
 
 
 def send(user, event):
@@ -193,10 +196,13 @@ def all_users():
 def add_link(link):
     con = sql.connect('test.db')
     cur = con.cursor()
-    cur.execute("INSERT INTO links(name, text, attachment) VALUES(?, ?, ?)",
+    try:
+        cur.execute("INSERT INTO links(name, text, attachment) VALUES(?, ?, ?)",
                 link.list())
-    con.commit()
-    links.append(link)
+        con.commit()
+        links.append(link)
+    except Exception as e:
+        print('adding link({0}, {1}) failed due to {2}'.format(link.name, link.text, e))
 
 
 def update_link(link):
@@ -228,7 +234,10 @@ def get_link_by_name(name):
     cur = con.cursor()
     cur.execute('SELECT * FROM links WHERE name = ?', [name])
     rows = cur.fetchall()
-    return Links.from_list(rows[0])
+    try:
+        return Links.from_list(rows[0])
+    except Exception as e:
+        print('selecting link {0} failed due to {1}'.format(name, e))
 
 
 def delete_link(name):
@@ -266,7 +275,7 @@ def delete_event(id_):
                 [id_])
     con.commit()
     for i, e in enumerate(events):
-        if e.name == id_:
+        if e.id_ == id_:
             events.remove(e)
 
 
@@ -278,6 +287,7 @@ def all_events():
     events.clear()
     for row in rows:
         events.append(Programme.from_list(row))
+    return events
 
 
 def get_event_by_id(id_):

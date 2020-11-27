@@ -112,6 +112,7 @@ def process_callback_1(query):
     if user.done[day] == '0':
         user.stage = 6
         db.update_user(user)
+        bot.send_message(query.message.chat.id, 'Отправьте свой отчет в чат.')
     else:
         bot.send_message(query.message.chat.id, 'Самоотчет выполняется только раз в день.')
 
@@ -123,7 +124,10 @@ def process_callback_1(query):
     bot.send_message(query.message.chat.id, link.text)
     files = link.attachment.split()
     for file in files:
-        bot.send_document(query.message.chat.id, file)
+        try:
+            bot.send_photo(query.message.chat.id, file)
+        except Exception as e:
+            bot.send_document(query.message.chat.id, file)
 
 
 @bot.message_handler(commands=['help', 'start'])
@@ -146,7 +150,10 @@ def start_message(message):
 
     def doc(document):
         if document is not None and document != '':
-            bot.send_message(id_, document)
+            try:
+                bot.send_photo(id_, document)
+            except Exception as e:
+                bot.send_document(id_, document)
 
     remove_markup()
     markup = types.ReplyKeyboardMarkup(True, True)
@@ -184,21 +191,25 @@ def start_message(message):
     db.update_user(user)
 
 
-@bot.message_handler(content_types=['text', 'document', 'photo'])
+@bot.message_handler(content_types=['text', 'document', 'photo', 'audio'])
 def send_text(message):
+    print(str(message))
     text = message.text
+    if text is None:
+        text = message.caption
     id_ = message.chat.id
     name = message.chat.first_name
     login = message.chat.username
     print('receiving {0} from {1} at {2}'.format(text, name, dt.datetime.now()))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
-    try:
-        document = message.document.file_id
-        text = message.caption
-        print('document is {0}'.format(document))
-    except Exception as e:
-        pass
+    if message.document is not None:
+        document += message.document.file_id
+    if message.photo is not None:
+        document += message.photo[1].file_id
+    if message.audio is not None:
+        document += message.audio.file_id
+    print('document is {0}'.format(document))
 
     def remove_markup():
         t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardRemove())
@@ -208,9 +219,30 @@ def send_text(message):
         bot.send_message(id_, message, reply_markup=markup)
 
     def doc(document):
-        if document is not None and document != '':
-            for d in document.split():
-                bot.send_document(id_, d)
+        if document is not None:
+            if type(document) is str:
+                document = document.split()
+                if(len(document) > 1):
+                    for d in document:
+                        try:
+                            bot.send_photo(id_, d)
+                        except Exception as e:
+                            bot.send_document(id_, d)
+                else:
+                    try:
+                        bot.send_photo(id_, document[0])
+                    except Exception as e:
+                        bot.send_document(id_, document[0])
+            else:
+                try:
+                    bot.send_photo(id_, document)
+                except Exception as e:
+                    bot.send_document(id_, document)
+
+    if text is None:
+        print(str(message))
+        msg('Кажется, вы ничего не ввели в чат.')
+        return
 
     # TODO payments
     # if not db.is_allowed_login(login):
@@ -260,7 +292,7 @@ def send_text(message):
                 text = text[1:]
                 event = Programme.Event(text, document, 0, number, dt.datetime.utcnow().replace(year=day))
                 db.add_event(event)
-                msg('Уведомление успешно добавлено Введите /start для выхода в главное меню.')
+                msg('Уведомление успешно добавлено\nВведите /start для выхода в главное меню.')
                 user.stage = 0
                 return
             except Exception as e:
@@ -315,6 +347,9 @@ def send_text(message):
                         txt = text[text.find('Текст: ') + 7:]
                         event = db.get_event_by_id(num)
                         event.text = txt
+                        if event.attachment is None:
+                            event.attachment = ''
+                        event.attachment += ' ' + document
                         if event.type == 0:
                             event.datetime.replace(year=nums[1])
                             event.number = nums[2]
@@ -335,7 +370,8 @@ def send_text(message):
                     msg('Неверный формат ввода. Чтобы изменить сообщение, скопируйте его в поле ввода и '
                         'отправьте отредактированный вариант. Вы можете приложить документ, чтобы добавить его к '
                         'сообщению.\n Для удаления оповещения введите "№ X @#", где X - его номер\n'
-                        'Введите другой день, если хотите просмотреть напоминания для него.')
+                        'Введите другой день, если хотите просмотреть напоминания для него.\n'
+                        'Для выхода в главное меню нажмите /start')
                     return
 
             elif text == 'Покажи недавние другие сообщения':
@@ -397,13 +433,15 @@ def send_text(message):
             return
 
         # add link
-        if user.stage == 7:
+        if user.stage == 7 and text is not None:
             txt = text.split(sep='\n')
-            if len(txt) != 2 or len(txt[0]) == 0 or len(txt[1]) == 0:
+            if len(txt) < 2 or len(txt[0]) == 0 or len(txt[1]) == 0:
                 msg('Неверный формат ввода. Введите название упражнения, для которого хотите добавить ссылку, '
                     'в следующей строке его описание и приложите документ, если необходимо, либо введите /start, чтобы '
                     'вернуться в главное меню.')
                 return
+            for i in range(2, len(txt)):
+                txt[1] += '\n' + txt[i]
             db.add_link(Links.Link(txt[0], txt[1], document))
             msg('Ссылка для упражнения {0} успешно добавлена. Вы можете добавить еще ссылки, либо введите /start для '
                 'выхода в главное меню.'.format(txt[0]))
@@ -418,12 +456,14 @@ def send_text(message):
                     'Либо введите /start для выхода в главное меню.'.format(txt))
                 return
             txt = text.split(sep='\n')
-            if len(txt) != 2 or len(txt[0]) == 0 or len(txt[1]) == 0:
+            if len(txt) < 2 or len(txt[0]) == 0 or len(txt[1]) == 0:
                 msg('Неверный формат ввода. Чтобы изменить ссылку, скопируйте ее в поле ввода и отправьте '
                     'отредактированный вариант. Вы можете приложить документ, чтобы добавить его к ссылке\n '
                     'Для удаления ссылки введите название упражнения и @#. Например, Самоотчет @#\n'
                     'Нажмите /start для выхода в главное меню.')
                 return
+            for i in range(2, len(txt)):
+                txt[1] += '\n' + txt[i]
             link = db.get_link_by_name(txt[0])
             link.text = txt[1]
             link.attachment += ' ' + document
