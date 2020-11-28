@@ -1,1 +1,1 @@
-web: python tele_bot.py
+web: python tele-bot.py
