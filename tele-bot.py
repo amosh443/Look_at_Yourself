@@ -29,8 +29,6 @@ db.init()
 
 time_diff = lambda first, second: (first - second + 24) % 24
 
-def __init__():
-    pass
 
 def welcome(user):
     def msg(message, markup=None):
@@ -50,7 +48,8 @@ def welcome(user):
     time.sleep(30)
     doc('о курсе.pdf')
     time.sleep(30)
-    msg('Вам будут приходить сообщения-напоминания о необходимости выполнения определенных практик. 💬\n\nКаждый день у '
+    msg(
+        'Вам будут приходить сообщения-напоминания о необходимости выполнения определенных практик. 💬\n\nКаждый день у '
         'нас будет четыре обязательных упражнения:\n✔️Медитация осознанности, которую я рекомендую выполнять '
         'утром\n✔️Моменты возвращения внимания к настоящему\n✔️Медитация любящей доброты (её буддийское название – '
         'метта)\n✔️Запись своих мыслей и эмоций уже под вечер\n\nДень лучше начинать с фокусировки и расслабления – '
@@ -108,7 +107,7 @@ def after_settings(user):
 
 @bot.callback_query_handler(lambda query: query.data == 'done')
 def process_callback_1(query):
-    #bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
+    # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
     user = db.get_user_by_login(query.message.chat.username)
     day = (dt.datetime.utcnow() - user.start).days
     if user.done[day] == '0':
@@ -164,10 +163,10 @@ def start_message(message):
            'ежедневных напоминаний.\nНажмите Обратная связь для общения с администрацией.\nНажмите FAQ для просмотра ' \
            'ответов на часто задаваемые вопросы.\n '
 
-    #if not db.is_allowed_login(login):
+    # if not db.is_allowed_login(login):
 
     #    return
-        # TODO payment
+    # TODO payment
 
     if db.get_user_by_login(login) is None:
         new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
@@ -224,7 +223,7 @@ def send_text(message):
         if document is not None:
             if type(document) is str:
                 document = document.split()
-                if(len(document) > 1):
+                if (len(document) > 1):
                     for d in document:
                         try:
                             bot.send_photo(id_, d)
@@ -643,5 +642,6 @@ def send_text(message):
 
     if text == 'FAQ':
         msg('Тут будет FAQ\nНажмите /start для выхода в главное меню.')
+
 
 bot.polling()
