@@ -29,6 +29,8 @@ db.init()
 
 time_diff = lambda first, second: (first - second + 24) % 24
 
+def __init__():
+    pass
 
 def welcome(user):
     def msg(message, markup=None):
