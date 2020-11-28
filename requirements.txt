@@ -1,0 +1,9 @@
+certifi==2020.11.8
+chardet==3.0.4
+idna==2.10
+pyTelegramBotAPI==3.7.3
+requests==2.25.0
+schedule==0.6.0
+six==1.15.0
+telebot==0.0.3
+urllib3==1.26.1
