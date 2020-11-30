@@ -23,7 +23,7 @@ bot = telebot.TeleBot(token)
 def commit():
     os.system('git add *')
     os.system('git commit -am "update"')
-    os.system('git push https://github.com/amosh443/Look_at_Yourself')
+    os.system('git push https://github.com/amosh443/rep')
     print('git updated')
 
 commit()
