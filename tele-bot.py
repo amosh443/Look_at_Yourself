@@ -16,13 +16,14 @@ import User
 import Programme
 import time as timing
 
-token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"
+token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
 
-def commit:
+def commit():
     os.system('git add *')
-    os.system('git commit -am ')
+    os.system('git commit -am "update"')
+    print('git updated')
 
 schedule.every().minute.do(commit)
 
@@ -125,10 +126,10 @@ def process_callback_1(query):
         bot.send_message(query.message.chat.id, 'Самоотчет выполняется только раз в день.')
 
 
-@bot.callback_query_handler(lambda query: query.data == 'link')
+@bot.callback_query_handler(lambda query: query.data[:4] == 'link')
 def process_callback_1(query):
     # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id) #removes markup
-    link = db.get_link_by_name(query.message.text[19:])
+    link = db.get_link_by_name(query.data[4:])
     bot.send_message(query.message.chat.id, link.text)
     files = link.attachment.split()
     for file in files:
@@ -241,6 +242,8 @@ def send_text(message):
                         bot.send_photo(id_, document[0])
                     except Exception as e:
                         bot.send_document(id_, document[0])
+                    except Exception as e:
+                        print(e)
             else:
                 try:
                     bot.send_photo(id_, document)

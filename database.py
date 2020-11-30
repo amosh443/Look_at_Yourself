@@ -11,7 +11,7 @@ import threading
 import datetime as dt
 import time
 
-token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"
+token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
 
@@ -23,7 +23,7 @@ def msg(user, message):
     for link in links:
 
         if link.name in message:
-            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name), callback_data='link'))
+            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name), callback_data='link' + link.name))
     if 'Самоотчёт' in message:
         markup.add(InlineKeyboardButton('📝Отправить самоотчет', callback_data='done'))
     bot.send_message(user.chat_id, message, reply_markup=markup)
