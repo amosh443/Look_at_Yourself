@@ -1,6 +1,8 @@
 import datetime as dt
 import threading
 import time
+import os
+import schedule
 
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -18,6 +20,11 @@ token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"
 
 bot = telebot.TeleBot(token)
 
+def commit:
+    os.system('git add *')
+    os.system('git commit -am ')
+
+schedule.every().minute.do(commit)
 
 def message_to_id_(id_, message, attachment=None):
     bot.send_message(id_, message)
