@@ -27,6 +27,7 @@ def commit():
     print('git updated')
 
 commit()
+bot.send_document('almosh822', 'test.db')
 #schedule.every().minute.do(commit)
 
 def message_to_id_(id_, message, attachment=None):
