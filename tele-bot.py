@@ -145,9 +145,9 @@ def start_message(message):
     # inline_kb1 = InlineKeyboardMarkup(True).add(inline_btn_1)
     # msg("Первая инлайн кнопка", inline_kb1)
 
-    def remove_markup():
-        t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardRemove())
-        bot.delete_message(id_, t.message_id)
+    #def remove_markup():
+    #    t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardHide())
+    #    bot.delete_message(id_, t.message_id)
 
     def doc(document):
         if document is not None and document != '':
@@ -156,7 +156,7 @@ def start_message(message):
             except Exception as e:
                 bot.send_document(id_, document)
 
-    remove_markup()
+    #remove_markup()
     markup = types.ReplyKeyboardMarkup(True, True)
     markup.row('Настройки', 'Обратная связь', 'FAQ')
     resp = 'Вы успешно вошли в главное меню.\nНажмите Настройки для просмотра/изменения часового пояса и времени ' \
@@ -212,9 +212,9 @@ def send_text(message):
         document += message.audio.file_id
     print('document is {0}'.format(document))
 
-    def remove_markup():
-        t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardRemove())
-        bot.delete_message(id_, t.message_id)
+    #def remove_markup():
+    #    t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardRemove())
+    #    bot.delete_message(id_, t.message_id)
 
     def msg(message, markup=None):
         bot.send_message(id_, message, reply_markup=markup)
