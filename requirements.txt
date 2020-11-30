@@ -1,7 +1,7 @@
 certifi==2020.11.8
 chardet
 idna
-PyTelegramBotAPI==2.2.3
+PyTelegramBotAPI==3.0
 requests
 schedule
 six
