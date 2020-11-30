@@ -241,9 +241,10 @@ def send_text(message):
                     try:
                         bot.send_photo(id_, document[0])
                     except Exception as e:
-                        bot.send_document(id_, document[0])
-                    except Exception as e:
-                        print(e)
+                        try:
+                            bot.send_document(id_, document[0])
+                        except Exception as e:
+                            print(e)
             else:
                 try:
                     bot.send_photo(id_, document)
