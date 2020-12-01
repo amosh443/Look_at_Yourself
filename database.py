@@ -1,3 +1,4 @@
+import os
 import sqlite3 as sql
 
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -16,6 +17,11 @@ token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
 
 bot = telebot.TeleBot(token)
 
+def commit(cur):
+    cur.commit()
+    os.system('git add test.db')
+    os.system('git commit -am "auto-update"')
+    print('git updated')
 
 def msg(user, message):
     all_links()
@@ -96,14 +102,14 @@ def add_users_timing(user):  # times = [[hour, minute]]
         if u.login == user.login:
             users[i] = user
 
-    con.commit()
+    commit(con)
 
 
 def update_user_timing(user):
     con = sql.connect('test.db')
     cur = con.cursor()
     cur.execute('DELETE FROM users_timings WHERE login = ?', [user.login])
-    con.commit()
+    commit(con)
     add_users_timing(user)
 
 
@@ -120,7 +126,7 @@ def add_allowed_login(login):
     con = sql.connect('test.db')
     cur = con.cursor()
     cur.execute('INSERT INTO allowed_logins(login) VALUES(?)', [login])
-    con.commit()
+    commit(con)
 
 
 def get_allowed_logins():
@@ -165,7 +171,7 @@ def add_user(user):
                     [user.login, user.done])
     except Exception as e:
         print(e)
-    con.commit()
+    commit(con)
     users.append(user)
 
 
@@ -178,7 +184,7 @@ def update_user(user):
                 args)
     cur.execute('UPDATE reports SET done = ? WHERE login = ?',
                 [user.done, user.login])
-    con.commit()
+    commit(con)
     for i, u in enumerate(users):
         if u.login == user.login:
             users[i] = user
@@ -200,7 +206,7 @@ def add_link(link):
     try:
         cur.execute("INSERT INTO links(name, text, attachment) VALUES(?, ?, ?)",
                 link.list())
-        con.commit()
+        commit(con)
         links.append(link)
     except Exception as e:
         print('adding link({0}, {1}) failed due to {2}'.format(link.name, link.text, e))
@@ -213,7 +219,7 @@ def update_link(link):
     args.append(link.name)
     cur.execute('UPDATE links SET name = ?, text = ?, attachment = ? WHERE name = ?',
                 args)
-    con.commit()
+    commit(con)
     for i, l in enumerate(links):
         if l.name == link.name:
             links[i] = link
@@ -246,7 +252,7 @@ def delete_link(name):
     cur = con.cursor()
     cur.execute("DELETE FROM links WHERE name = ?",
                 [name])
-    con.commit()
+    commit(con)
     for i, l in enumerate(links):
         if l.name == name:
             links.remove(l)
@@ -257,7 +263,7 @@ def add_event(event):
     cur = con.cursor()
     cur.execute("INSERT INTO events(text, attachment, type, datetime, number) VALUES(?, ?, ?, ?, ?)",
                 event.fresh_list())
-    con.commit()
+    commit(con)
     events.append(event)
 
 
@@ -266,7 +272,7 @@ def add_test_event(event):
     cur = con.cursor()
     cur.execute("INSERT INTO test_events(text, attachment, type, datetime, number) VALUES(?, ?, ?, ?, ?)",
                 event.fresh_list())
-    con.commit()
+    commit(con)
 
 
 def delete_event(id_):
@@ -274,7 +280,7 @@ def delete_event(id_):
     cur = con.cursor()
     cur.execute("DELETE FROM events WHERE id = ?",
                 [id_])
-    con.commit()
+    commit(con)
     for i, e in enumerate(events):
         if e.id_ == id_:
             events.remove(e)
@@ -305,7 +311,7 @@ def update_event(event):
     args = event.list()
     cur.execute('UPDATE events SET text = ?, attachment = ?, type = ?, datetime = ?, number = ? WHERE id = ?',
                 args)
-    con.commit()
+    commit(con)
     for i, e in enumerate(events):
         if e.id_ == event.id_:
             events[i] = event
@@ -315,7 +321,7 @@ def add_admin(login):
     con = sql.connect('test.db')
     cur = con.cursor()
     cur.execute('INSERT INTO admins(login) VALUES(?)', [login])
-    con.commit()
+    commit(con)
 
 
 def get_admins():
@@ -337,7 +343,7 @@ def add_message(message):
     cur = con.cursor()
     cur.execute("INSERT INTO messages(login, text, attachment, datetime) VALUES(?, ?, ?, ?)",
                 message.list())
-    con.commit()
+    commit(con)
 
 
 def all_messages():
@@ -355,4 +361,4 @@ def delete_messages():
     con = sql.connect('test.db')
     cur = con.cursor()
     cur.execute('DELETE FROM messages')
-    con.commit()
+    commit(con)

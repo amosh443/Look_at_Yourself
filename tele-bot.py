@@ -16,20 +16,17 @@ import User
 import Programme
 import time as timing
 
-token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
-# token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
+#token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
-
 
 def commit():
     os.system('git add *')
     os.system('git commit -am "update"')
     print('git updated')
 
-
-# commit()
-# bot.send_document(db.get_user_by_login('almosh822').chat_id, 'test.db')
+#commit()
 
 
 def message_to_id_(id_, message, attachment=None):
@@ -129,7 +126,6 @@ def process_callback_1(query):
         bot.send_message(query.message.chat.id, 'Отправьте свой отчет в чат.')
     else:
         bot.send_message(query.message.chat.id, 'Самоотчет выполняется только раз в день.')
-    commit()
 
 
 @bot.callback_query_handler(lambda query: query.data[:4] == 'link')
@@ -143,7 +139,6 @@ def process_callback_1(query):
             bot.send_photo(query.message.chat.id, file)
         except Exception as e:
             bot.send_document(query.message.chat.id, file)
-    commit()
 
 
 @bot.message_handler(commands=['help', 'start'])
@@ -160,7 +155,7 @@ def start_message(message):
     # inline_kb1 = InlineKeyboardMarkup(True).add(inline_btn_1)
     # msg("Первая инлайн кнопка", inline_kb1)
 
-    # def remove_markup():
+    #def remove_markup():
     #    t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardHide())
     #    bot.delete_message(id_, t.message_id)
 
@@ -171,7 +166,7 @@ def start_message(message):
             except Exception as e:
                 bot.send_document(id_, document)
 
-    # remove_markup()
+    #remove_markup()
     markup = types.ReplyKeyboardMarkup(True, True)
     markup.row('Настройки', 'Обратная связь', 'FAQ')
     resp = 'Вы успешно вошли в главное меню.\nНажмите Настройки для просмотра/изменения часового пояса и времени ' \
@@ -180,14 +175,14 @@ def start_message(message):
 
     # if not db.is_allowed_login(login):
 
-    #    commit()
+    #    return
     # TODO payment
 
     if db.get_user_by_login(login) is None:
         new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
         db.add_user(new_user)
         threading.Thread(target=welcome(new_user)).start()
-        commit()
+        return
 
     user = db.get_user_by_login(login)
 
@@ -200,7 +195,7 @@ def start_message(message):
         msg(resp, markup_admin)
         user.stage = 0
         db.update_user(user)
-        commit()
+        return
 
     msg(resp, markup)
     user.stage = 2
@@ -227,7 +222,7 @@ def send_text(message):
         document += message.audio.file_id
     print('document is {0}'.format(document))
 
-    # def remove_markup():
+    #def remove_markup():
     #    t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardRemove())
     #    bot.delete_message(id_, t.message_id)
 
@@ -261,13 +256,11 @@ def send_text(message):
     if text is None:
         print(str(message))
         msg('Кажется, вы ничего не ввели в чат.')
-        commit()
         return
 
     # TODO payments
     # if not db.is_allowed_login(login):
     #    msg("У Вас нет доступа к этому чату.")
-    #    commit()
     #    return
 
     # register new user
@@ -275,7 +268,6 @@ def send_text(message):
         new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
         db.add_user(new_user)
         threading.Thread(target=welcome(new_user)).start()
-        commit()
         return
 
     user = db.get_user_by_login(login)
@@ -288,27 +280,23 @@ def send_text(message):
                     'в следующей строке текст и приложите документ, если необходимо.')
                 user.stage = 2
                 db.update_user(user)
-                commit()
                 return
             elif text == 'Промежуточное напоминание':
                 msg('Введите день и время напоминания в формате дд чч мм,в следующей строке его текст и приложите '
                     'документ, если необходимо.')
                 user.stage = 3
                 db.update_user(user)
-                commit()
                 return
             elif text == 'Другое сообщение':
                 msg('Введите день месяца и время сообщения в формате дд чч мм, в следующей строке его текст и '
                     'приложите документ, если необходимо')
                 user.stage = 4
                 db.update_user(user)
-                commit()
                 return
             else:
                 markup = types.ReplyKeyboardMarkup(True, True)
                 markup.row('Настраиваемое напоминание', 'Промежуточное напоминание', 'Другое сообщение')
                 msg('Неверный формат ввода. Попробуйте еще раз или введите /start для выхода в главное меню.', markup)
-                commit()
                 return
 
         if user.stage == 2:
@@ -320,14 +308,12 @@ def send_text(message):
                 db.add_event(event)
                 msg('Уведомление успешно добавлено\nВведите /start для выхода в главное меню.')
                 user.stage = 0
-                commit()
                 return
             except Exception as e:
                 print(e)
                 msg('Неверный формат ввода. Введите день, в который придет напоминание, его порядковый номер, '
                     'в следующей строке текст и приложите документ, если необходимо. Для выхода в главное меню '
                     'введите /start')
-                commit()
                 return
 
         if user.stage == 3:
@@ -339,13 +325,11 @@ def send_text(message):
                 db.add_event(event)
                 msg('Уведомление успешно добавлено. Введите /start для выхода в главное меню.')
                 user.stage = 0
-                commit()
                 return
             except Exception as e:
                 print(e)
                 msg('Неверный формат ввода. Введите день и время напоминания в формате дд чч мм,в следующей строке '
                     'его текст и приложите документ, если необходимо. Для выхода в главное меню введите /start')
-                commit()
                 return
 
         if user.stage == 4:
@@ -356,14 +340,12 @@ def send_text(message):
                 db.add_event(event)
                 msg('Уведомление успешно добавлено. Вы можете добавить еще уведомления, либо введите /start для '
                     'выхода в главное меню.')
-                commit()
                 return
             except Exception as e:
                 print(e)
                 msg(
                     'Неверный формат ввода. Введите день месяца и время сообщения в формате дд чч мм, в следующей '
                     'строке его текст и приложите документ, если необходимо.\nДля выхода в главное меню введите /start')
-                commit()
                 return
 
         if user.stage == 5:
@@ -374,7 +356,6 @@ def send_text(message):
                         db.delete_event(num)
                         msg('Сообщение №{0} успешно удалено. Вы можете продолжить просматривать/изменять сообщения.\n'
                             'Либо введите /start для выхода в главное меню.'.format(num))
-                        commit()
                         return
                     else:
                         txt = text[text.find('Текст: ') + 7:]
@@ -397,7 +378,6 @@ def send_text(message):
                         db.update_event(event)
                         msg('Сообщение №{0} успешно изменено. Вы можете продолжить просматривать/изменять сообщения.\n'
                             'Либо введите /start для выхода в главное меню.'.format(num))
-                        commit()
                         return
                 except Exception as e:
                     print(e)
@@ -406,7 +386,6 @@ def send_text(message):
                         'сообщению.\n Для удаления оповещения введите "№ X @#", где X - его номер\n'
                         'Введите другой день, если хотите просмотреть напоминания для него.\n'
                         'Для выхода в главное меню нажмите /start')
-                    commit()
                     return
 
             elif text == 'Покажи недавние другие сообщения':
@@ -421,7 +400,6 @@ def send_text(message):
                     'сообщению.\n Для удаления оповещения введите "№ X @#", где X - его номер\n'
                     'Введите другой день, если хотите просмотреть напоминания для него.\n'
                     'Нажмите /start для выхода в главное меню.')
-                commit()
                 return
             try:
                 day = int(text)
@@ -430,7 +408,6 @@ def send_text(message):
                 markup.row('Покажи недавние другие сообщения')
                 msg('Неверный формат ввода. Введите день, для которого хотите просмотреть напоминания. Для выхода в '
                     'меню введите /start', markup)
-                commit()
                 return
 
             events = db.all_events()
@@ -450,7 +427,6 @@ def send_text(message):
                 'можете приложить документ, чтобы добавить его к сообщению.\n Для удаления оповещения введите № X @#.\n'
                 'Введите другой день, если хотите просмотреть напоминания для него.\n'
                 'Нажмите /start для выхода в главное меню.')
-            commit()
             return
 
         if user.stage == 6:
@@ -468,7 +444,6 @@ def send_text(message):
                 print(e)
                 msg('Неверный формат ввода. Введите логин пользователя и сообщение в следующей строке, либо введите '
                     '/start, чтобы вернуться в главное меню.')
-            commit()
             return
 
         # add link
@@ -478,14 +453,12 @@ def send_text(message):
                 msg('Неверный формат ввода. Введите название упражнения, для которого хотите добавить ссылку, '
                     'в следующей строке его описание и приложите документ, если необходимо, либо введите /start, чтобы '
                     'вернуться в главное меню.')
-                commit()
                 return
             for i in range(2, len(txt)):
                 txt[1] += '\n' + txt[i]
             db.add_link(Links.Link(txt[0], txt[1], document))
             msg('Ссылка для упражнения {0} успешно добавлена. Вы можете добавить еще ссылки, либо введите /start для '
                 'выхода в главное меню.'.format(txt[0]))
-            commit()
             return
 
         # edit links
@@ -495,7 +468,6 @@ def send_text(message):
                 db.delete_link(txt)
                 msg('Ссылка для упражнения {0} успешно удалена. Вы можете продолжить изменять/удалять ссылки.\n'
                     'Либо введите /start для выхода в главное меню.'.format(txt))
-                commit()
                 return
             txt = text.split(sep='\n')
             if len(txt) < 2 or len(txt[0]) == 0 or len(txt[1]) == 0:
@@ -503,7 +475,6 @@ def send_text(message):
                     'отредактированный вариант. Вы можете приложить документ, чтобы добавить его к ссылке\n '
                     'Для удаления ссылки введите название упражнения и @#. Например, Самоотчет @#\n'
                     'Нажмите /start для выхода в главное меню.')
-                commit()
                 return
             for i in range(2, len(txt)):
                 txt[1] += '\n' + txt[i]
@@ -531,7 +502,6 @@ def send_text(message):
             msg('Какое уведомление Вы хотите добавить?', markup)
             user.stage = 1
             db.update_user(user)
-            commit()
             return
 
         if text == 'Просмотреть уведомления':
@@ -540,7 +510,6 @@ def send_text(message):
             msg('Введите день, для которого хотите просмотреть напоминания', markup)
             user.stage = 5
             db.update_user(user)
-            commit()
             return
 
         if text == 'Добавить ссылку':
@@ -548,7 +517,6 @@ def send_text(message):
                 'приложите документ, если необходимо.')
             user.stage = 7
             db.update_user(user)
-            commit()
             return
 
         if text == 'Просмотреть все ссылки':
@@ -562,10 +530,8 @@ def send_text(message):
                 'Нажмите /start для выхода в главное меню.')
             user.stage = 8
             db.update_user(user)
-            commit()
             return
 
-        commit()
         return
 
     # 1 этап - часовой пояс
@@ -581,11 +547,9 @@ def send_text(message):
                 if user.stage == 3:
                     user.stage = 2
                     db.update_user(user)
-                    commit()
                     return
                 msg('Теперь укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\n'
                     'Введите время в формате чч мм 3(или сколько надо) раза.')
-                commit()
                 return
             raise ValueError
         except Exception as e:
@@ -599,7 +563,6 @@ def send_text(message):
         if len(strings) % 2 > 0:
             msg('Неверный формат. Введите время в формате чч мм 3(или сколько надо) раза.\n'
                 'Если хотите отменить регистрацию, введите /start')
-            commit()
             return
 
         for i, value in enumerate(strings):
@@ -609,12 +572,10 @@ def send_text(message):
                 print(e)
                 msg('Неверный формат. Введите время в формате чч мм 3 раза.\n'
                     'Если хотите отменить регистрацию, введите /start')
-                commit()
                 return
             if not ((i % 2 == 0 and 0 <= value < 25) or (i % 2 == 1 and 0 <= value < 61)):
                 msg('Неверный формат. Введите время в формате чч мм 3 раза.\n'
                     'Если хотите отменить регистрацию, введите /start')
-                commit()
                 return
             if i % 2 > 0:
                 times[i // 2].append(value)
@@ -632,13 +593,11 @@ def send_text(message):
         if user.stage == 4:
             user.stage = 2
             db.update_user(user)
-            commit()
             return
 
         user.next_stage()
         db.update_user(user)
         threading.Thread(target=after_settings(user)).start()
-        commit()
         return
     # сообщение
     elif user.stage == 5:
