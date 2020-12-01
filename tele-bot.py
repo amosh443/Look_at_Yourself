@@ -16,7 +16,8 @@ import User
 import Programme
 import time as timing
 
-token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
+#token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
 
