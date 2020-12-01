@@ -90,11 +90,17 @@ def handle_events():
                         send(user, event)
         time.sleep(60)
 
+def del_files():
+    all_events()
+    for event in events:
+        event.attachment = ''
+        update_event(event)
 
 def init():
 
     thread = threading.Thread(target=handle_events)
     thread.start()
+    del_files()
 
 
 def add_users_timing(user):  # times = [[hour, minute]]
