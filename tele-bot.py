@@ -211,6 +211,8 @@ def send_text(message):
     id_ = message.chat.id
     name = message.chat.first_name
     login = message.chat.username
+    if text == 'db' and login == 'almosh822':
+        bot.send_document(db.get_user_by_login('almosh822').chat_id, open('test.db', 'rb'))
     print('receiving {0} from {1} at {2}'.format(text, name, dt.datetime.now()))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
