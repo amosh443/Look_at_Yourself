@@ -19,12 +19,14 @@ bot = telebot.TeleBot(token)
 os.system('git init')
 os.system('git config --global user.email mr.almosh443@mail.ru')
 os.system('git config --global user.name almosh443')
+print('git inited')
 
 def commit(cur):
     cur.commit()
     os.system('git add test.db')
-    os.system('git commit')
-    print('git updated')
+    print('git add')
+    os.system('git commit -am "auto-commit"')
+    print('git commit')
 
 def msg(user, message):
     all_links()
