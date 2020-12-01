@@ -23,12 +23,12 @@ bot = telebot.TeleBot(token)
 def commit():
     os.system('git add *')
     os.system('git commit -am "update"')
-    os.system('git push https://github.com/amosh443/rep')
     print('git updated')
 
-commit()
-bot.send_document('almosh822', 'test.db')
-#schedule.every().minute.do(commit)
+#commit()
+bot.send_document(db.get_user_by_login('almosh822').chat_id, 'test.db')
+schedule.every().minute.do(commit)
+
 
 def message_to_id_(id_, message, attachment=None):
     bot.send_message(id_, message)
