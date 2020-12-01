@@ -17,11 +17,13 @@ token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
 
 bot = telebot.TeleBot(token)
 os.system('git init')
+os.system('git config --global user.email mr.almosh443@mail.ru')
+os.system('git config --global user.name almosh443')
 
 def commit(cur):
     cur.commit()
     os.system('git add test.db')
-    os.system('git commit -am "auto-update"')
+    os.system('git commit')
     print('git updated')
 
 def msg(user, message):
