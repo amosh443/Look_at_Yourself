@@ -27,7 +27,7 @@ def commit():
     print('git updated')
 
 #commit()
-bot.send_document(db.get_user_by_login('almosh822').chat_id, 'test.db')
+#bot.send_document(db.get_user_by_login('almosh822').chat_id, 'test.db')
 schedule.every().minute.do(commit)
 
 
