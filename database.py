@@ -12,21 +12,21 @@ import threading
 import datetime as dt
 import time
 
-token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
-#token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+#token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
+token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
-os.system('git init')
-os.system('git config --global user.email mr.almosh443@mail.ru')
-os.system('git config --global user.name almosh443')
-print('git inited')
+#os.system('git init')
+#os.system('git config --global user.email mr.almosh443@mail.ru')
+#os.system('git config --global user.name almosh443')
+#print('git inited')
 
 def commit(cur):
     cur.commit()
-    os.system('git add test.db')
-    print('git add')
-    os.system('git commit -am "auto-commit"')
-    print('git commit')
+    #os.system('git add test.db')
+    #print('git add')
+    #os.system('git commit -am "auto-commit"')
+    #print('git commit')
 
 def msg(user, message):
     all_links()
@@ -35,6 +35,8 @@ def msg(user, message):
     for link in links:
 
         if link.name in message:
+            if link.name == 'Метта' and 'Метта на себя' in message:
+                continue
             markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name), callback_data='link' + link.name))
     if 'Самоотчёт' in message:
         markup.add(InlineKeyboardButton('📝Отправить самоотчет', callback_data='done'))
@@ -91,16 +93,17 @@ def handle_events():
         time.sleep(60)
 
 def del_files():
-    all_events()
-    for event in events:
-        event.attachment = ''
-        update_event(event)
+    all_links()
+    for link in links:
+        link.attachment = ''
+        update_link(link)
+        print(link.text)
 
 def init():
 
     thread = threading.Thread(target=handle_events)
     thread.start()
-    del_files()
+    #del_files()
 
 
 def add_users_timing(user):  # times = [[hour, minute]]

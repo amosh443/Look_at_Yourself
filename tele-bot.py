@@ -16,14 +16,14 @@ import User
 import Programme
 import time as timing
 
-token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
-#token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+#token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
+token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
 
 def commit():
-    os.system('git add *')
-    os.system('git commit -am "update"')
+    #os.system('git add *')
+    #os.system('git commit -am "update"')
     print('git updated')
 
 #commit()
@@ -305,7 +305,10 @@ def send_text(message):
             try:
                 day = nums[0]
                 number = nums[1] - 1
-                text = text[1:]
+                txt = text.split(sep='\n')
+                text = ''
+                for i in range(1, len(txt)):
+                    text += txt[i] + '\n'
                 event = Programme.Event(text, document, 0, number, dt.datetime.utcnow().replace(year=day))
                 db.add_event(event)
                 msg('Уведомление успешно добавлено\nВведите /start для выхода в главное меню.')
@@ -322,7 +325,10 @@ def send_text(message):
             try:
                 datetime = dt.datetime.utcnow(). \
                     replace(year=nums[0], hour=nums[1], minute=nums[2])
-                text = text[8:]
+                txt = text.split(sep='\n')
+                text = ''
+                for i in range(1, len(txt)):
+                    text += txt[i] + '\n'
                 event = Programme.Event(text, document, 1, -1, datetime)
                 db.add_event(event)
                 msg('Уведомление успешно добавлено. Введите /start для выхода в главное меню.')
@@ -337,7 +343,10 @@ def send_text(message):
         if user.stage == 4:
             try:
                 datetime = dt.datetime.utcnow().replace(day=nums[0], hour=nums[1], minute=nums[2])
-                text = text[9:]
+                txt = text.split(sep='\n')
+                text = ''
+                for i in range(1, len(txt)):
+                    text += txt[i] + '\n'
                 event = Programme.Event(text, document, 2, -1, datetime)
                 db.add_event(event)
                 msg('Уведомление успешно добавлено. Вы можете добавить еще уведомления, либо введите /start для '
