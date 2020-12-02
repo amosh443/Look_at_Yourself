@@ -32,12 +32,14 @@ def msg(user, message):
     all_links()
     markup = InlineKeyboardMarkup(True)
     print('sending {0} to {1} at {2}'.format(message, user.login, dt.datetime.now()))
+    tmp = 0
     for link in links:
 
         if link.name in message:
             if link.name == 'Метта' and 'Метта на себя' in message:
                 continue
-            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name), callback_data='link' + link.name))
+            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name), callback_data='link' + str(tmp)))
+            tmp += 1
     if 'Самоотчёт' in message:
         markup.add(InlineKeyboardButton('📝Отправить самоотчет', callback_data='done'))
     bot.send_message(user.chat_id, message, reply_markup=markup)

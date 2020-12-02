@@ -131,7 +131,18 @@ def process_callback_1(query):
 @bot.callback_query_handler(lambda query: query.data[:4] == 'link')
 def process_callback_1(query):
     # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id) #removes markup
-    link = db.get_link_by_name(query.data[4:])
+    #link = db.get_link_by_name(query.data[4:])
+    num = int(query.data[4:])
+    links = db.all_links()
+    tmp = 0
+    for link in links:
+        if link.name in query.message.text:
+            if link.name == 'Метта' and 'Метта на себя' in query.message.text:
+                continue
+            if tmp == num:
+                link = db.get_link_by_name(link.name)
+                break
+            tmp += 1
     bot.send_message(query.message.chat.id, link.text)
     files = link.attachment.split()
     for file in files:
