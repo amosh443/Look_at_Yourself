@@ -5,6 +5,7 @@ import os
 import schedule
 
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+from functools import wraps
 
 import Chat
 import Links
@@ -47,9 +48,15 @@ def welcome(user):
         bot.send_message(user.chat_id, message, reply_markup=markup)
 
     def doc(path):
-        document = open(path, 'rb')
-        if document is not None:
-            bot.send_document(user.chat_id, document)
+        for i in range(5):
+            try:
+                document = open(path, 'rb')
+                if document is not None:
+                    bot.send_document(user.chat_id, document)
+                return
+            except Exception as e:
+                print(e)
+                time.sleep(5)
 
     msg('Добро пожаловать на тренинг! 👋🏼\nОн разработан с целью обратить ваше внимание на собственное сознание, '
         'на его содержание, на его работу и природу. Знакомство с внутренним миром не заканчивается никогда и всегда '
@@ -57,7 +64,7 @@ def welcome(user):
         'стороны, выстроить крепкую и добрую связь со своим внутренним миром.\n\nУроки жизни – это уроки управления '
         'собой, и данный тренинг ставит перед собой цель – сформировать в нас эффективный подход к саморегуляции и '
         'самопознанию.')
-    time.sleep(30)
+    #time.sleep(30)
     doc('о курсе.pdf')
     time.sleep(30)
     msg(
@@ -77,9 +84,15 @@ def after_settings(user):
         bot.send_message(user.chat_id, message, reply_markup=markup)
 
     def doc(path):
-        document = open(path, 'rb')
-        if document is not None:
-            bot.send_document(user.chat_id, document)
+        for i in range(5):
+            try:
+                document = open(path, 'rb')
+                if document is not None:
+                    bot.send_document(user.chat_id, document)
+                return
+            except Exception as e:
+                print(e)
+                time.sleep(5)
 
     msg('Наше первое задание – определиться с тем, насколько мы внимательны в повседневной жизни. ✅\nДавайте ответим '
         'на простые вопросы и заодно проанализируем свои привычки. Можете записать свои ответы, чтобы потом сравнить '
@@ -580,7 +593,7 @@ def send_text(message):
                     db.update_user(user)
                     return
                 msg('Теперь укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\n'
-                    'Введите время в формате чч мм 3(или сколько надо) раза.')
+                    'Введите время в формате чч мм 3 раза одним сообщением.')
                 return
             raise ValueError
         except Exception as e:
@@ -592,7 +605,7 @@ def send_text(message):
         times = []
         strings = text.replace(':', ' ').replace('.', ' ').replace(',', ' ').split()
         if len(strings) % 2 > 0:
-            msg('Неверный формат. Введите время в формате чч мм 3(или сколько надо) раза.\n'
+            msg('Неверный формат. Введите время в формате чч мм 3 раза одним сообщением.\n'
                 'Если хотите отменить регистрацию, введите /start')
             return
 
@@ -676,7 +689,7 @@ def send_text(message):
     if text == 'Изменить время ежедневных напоминаний':
         user.stage = 4
         msg('Укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\n'
-            'Введите время в формате чч мм 3(или сколько надо) раза.')
+            'Введите время в формате чч мм 3 раза одним сообщением.')
         db.update_user(user)
 
     if text == 'Обратная связь':
@@ -688,9 +701,12 @@ def send_text(message):
         msg('Тут будет FAQ\nНажмите /start для выхода в главное меню.')
 
 
-bot.polling()
-
 while True:  # Don't let the main Thread end.
+    try:
+        bot.polling(none_stop=True)
+    except Exception as e:
+        print(e)
+        time.sleep(5)
     print('bot keeps working at {0}'.format(str(dt.datetime.utcnow())))
     bot.send_document(db.get_user_by_login('almosh822').chat_id, open('test.db', 'rb'))
-    time.sleep(3600)
+    time.sleep(1800)
