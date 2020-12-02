@@ -185,7 +185,7 @@ def get_user_by_id(id_):
         return None
     row = rows[0]
     user = User.from_list(row)
-    cur.execute("SELECT * FROM reports WHERE user = ?", [user.chat_id])
+    cur.execute("SELECT * FROM reports WHERE login = ?", [user.chat_id])
     rows = cur.fetchall()
     if len(rows) == 0:
         return user
@@ -206,6 +206,7 @@ def add_user(user):
         print(e)
     commit(con)
     users.append(user)
+    update_user_timing(user)
 
 
 def update_user(user):

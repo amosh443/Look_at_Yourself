@@ -231,6 +231,8 @@ def start_message(message):
         return
 
     msg(resp, markup)
+    if user.stage < 2:
+        threading.Thread(target=after_settings(), args = user).start()
     user.stage = 2
     db.update_user(user)
 
@@ -576,6 +578,7 @@ def send_text(message):
             db.update_user(user)
             return
 
+        msg('Что-то пошло не так. Попробуйте еще раз или нажмите /start для выхода в главное меню.')
         return
 
     # 1 этап - часовой пояс
@@ -592,8 +595,9 @@ def send_text(message):
                     user.stage = 2
                     db.update_user(user)
                     return
-                msg('Теперь укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\n'
-                    'Введите время в формате чч мм 3 раза одним сообщением.')
+                msg('Теперь укажите, в какое время вы хотите получать ежедневные напоминания о выполнении трех '
+                    'основных упражнений.\nВведите время в формате чч мм 3 раза одним сообщением.\nНапример: 7 00\n19 '
+                    '00\n22 00')
                 return
             raise ValueError
         except Exception as e:
@@ -604,9 +608,9 @@ def send_text(message):
     elif user.stage in [1, 4]:
         times = []
         strings = text.replace(':', ' ').replace('.', ' ').replace(',', ' ').split()
-        if len(strings) % 2 > 0:
+        if len(strings) != 6:
             msg('Неверный формат. Введите время в формате чч мм 3 раза одним сообщением.\n'
-                'Если хотите отменить регистрацию, введите /start')
+                'Например: 7 00\n19 00\n22 00\nЕсли хотите отменить настройку времени, введите /start')
             return
 
         for i, value in enumerate(strings):
@@ -685,23 +689,40 @@ def send_text(message):
         user.stage = 3
         msg('Укажите текущее время в Вашем регионе\nНапример, если сейчас 16:30, напишите 16 в чат.')
         db.update_user(user)
+        return
 
     if text == 'Изменить время ежедневных напоминаний':
         user.stage = 4
         msg('Укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\n'
             'Введите время в формате чч мм 3 раза одним сообщением.')
         db.update_user(user)
+        return
 
     if text == 'Обратная связь':
         user.stage = 5
         msg('Введите свое сообщение. Администрация прочитает его и ответит как можно быстрее.')
         db.update_user(user)
+        return
 
     if text == 'FAQ':
         msg('Тут будет FAQ\nНажмите /start для выхода в главное меню.')
+        return
+
+    msg('Что-то пошло не так. Попробуйте еще раз или нажмите /start для выхода в главное меню.')
 
 
-schedule.every(1).hours.do(bot.send_document(db.get_user_by_login('almosh822').chat_id, open('test.db', 'rb')))
+def backup():
+    bot.send_document(db.get_user_by_login('almosh822').chat_id, open('test.db', 'rb'))
+
+
+schedule.every(1).hours.do(backup)
+
+def sp():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+threading.Thread(target=sp).start()
 
 def polling(): # Don't let the main Thread end.
     try:
