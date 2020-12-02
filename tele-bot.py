@@ -120,38 +120,45 @@ def after_settings(user):
 @bot.callback_query_handler(lambda query: query.data == 'done')
 def process_callback_1(query):
     # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
-    user = db.get_user_by_login(query.message.chat.username)
-    day = (dt.datetime.utcnow() - user.start).days
-    if user.done[day] == '0':
-        user.stage = 6
-        db.update_user(user)
-        bot.send_message(query.message.chat.id, 'Отправьте свой отчет в чат.')
-    else:
-        bot.send_message(query.message.chat.id, 'Самоотчет выполняется только раз в день.')
+    try:
+        user = db.get_user_by_login(query.message.chat.username)
+        day = (dt.datetime.utcnow() - user.start).days
+        if user.done[day] == '0':
+            user.stage = 6
+            db.update_user(user)
+            bot.send_message(query.message.chat.id, 'Отправьте свой отчет в чат.')
+        else:
+            bot.send_message(query.message.chat.id, 'Самоотчет выполняется только раз в день.')
+    except Exception as e:
+        print(e)
 
 
 @bot.callback_query_handler(lambda query: query.data[:4] == 'link')
 def process_callback_1(query):
     # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id) #removes markup
     # link = db.get_link_by_name(query.data[4:])
-    num = int(query.data[4:])
-    links = db.all_links()
-    tmp = 0
-    for link in links:
-        if link.name in query.message.text:
-            if link.name == 'Метта' and 'Метта на себя' in query.message.text:
-                continue
-            if tmp == num:
-                link = db.get_link_by_name(link.name)
-                break
-            tmp += 1
-    bot.send_message(query.message.chat.id, link.text)
-    files = link.attachment.split()
-    for file in files:
-        try:
-            bot.send_photo(query.message.chat.id, file)
-        except Exception as e:
-            bot.send_document(query.message.chat.id, file)
+    print(query)
+    try:
+        num = int(query.data[4:])
+        links = db.all_links()
+        tmp = 0
+        for link in links:
+            if link.name in query.message.text:
+                if link.name == 'Метта' and 'Метта на себя' in query.message.text:
+                    continue
+                if tmp == num:
+                    link = db.get_link_by_name(link.name)
+                    break
+                tmp += 1
+        bot.send_message(query.message.chat.id, link.text)
+        files = link.attachment.split()
+        for file in files:
+            try:
+                bot.send_photo(query.message.chat.id, file)
+            except Exception as e:
+                bot.send_document(query.message.chat.id, file)
+    except Exception as e:
+        print(e)
 
 
 @bot.message_handler(commands=['help', 'start'])
