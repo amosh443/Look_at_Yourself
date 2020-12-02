@@ -685,4 +685,5 @@ bot.polling()
 
 while True:  # Don't let the main Thread end.
     print('bot keeps working at {0}'.format(str(dt.datetime.utcnow())))
+    bot.send_document(db.get_user_by_login('almosh822').chat_id, open('test.db', 'rb'))
     time.sleep(3600)
