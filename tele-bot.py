@@ -16,17 +16,19 @@ import User
 import Programme
 import time as timing
 
-#token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
+# token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
 token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
 
+
 def commit():
-    #os.system('git add *')
-    #os.system('git commit -am "update"')
+    # os.system('git add *')
+    # os.system('git commit -am "update"')
     print('git updated')
 
-#commit()
+
+# commit()
 
 
 def message_to_id_(id_, message, attachment=None):
@@ -131,7 +133,7 @@ def process_callback_1(query):
 @bot.callback_query_handler(lambda query: query.data[:4] == 'link')
 def process_callback_1(query):
     # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id) #removes markup
-    #link = db.get_link_by_name(query.data[4:])
+    # link = db.get_link_by_name(query.data[4:])
     num = int(query.data[4:])
     links = db.all_links()
     tmp = 0
@@ -166,7 +168,7 @@ def start_message(message):
     # inline_kb1 = InlineKeyboardMarkup(True).add(inline_btn_1)
     # msg("Первая инлайн кнопка", inline_kb1)
 
-    #def remove_markup():
+    # def remove_markup():
     #    t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardHide())
     #    bot.delete_message(id_, t.message_id)
 
@@ -177,7 +179,7 @@ def start_message(message):
             except Exception as e:
                 bot.send_document(id_, document)
 
-    #remove_markup()
+    # remove_markup()
     markup = types.ReplyKeyboardMarkup(True, True)
     markup.row('Настройки', 'Обратная связь', 'FAQ')
     resp = 'Вы успешно вошли в главное меню.\nНажмите Настройки для просмотра/изменения часового пояса и времени ' \
@@ -235,7 +237,7 @@ def send_text(message):
         document += message.audio.file_id
     print('document is {0}'.format(document))
 
-    #def remove_markup():
+    # def remove_markup():
     #    t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardRemove())
     #    bot.delete_message(id_, t.message_id)
 
@@ -680,3 +682,6 @@ def send_text(message):
 
 
 bot.polling()
+
+while True:  # Don't let the main Thread end.
+    pass
