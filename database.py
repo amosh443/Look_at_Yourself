@@ -168,7 +168,24 @@ def get_user_by_login(login):
         return None
     row = rows[0]
     user = User.from_list(row)
-    cur.execute("SELECT * FROM reports WHERE login = ?", [login])
+    cur.execute("SELECT * FROM reports WHERE login = ?", [user.chat_id])
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        return user
+    row = rows[0]
+    user.done = row[1]
+    return user
+
+def get_user_by_id(id_):
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute("SELECT * FROM users WHERE chat_id = ?", [id_])
+    rows = cur.fetchall()
+    if (len(rows) == 0):
+        return None
+    row = rows[0]
+    user = User.from_list(row)
+    cur.execute("SELECT * FROM reports WHERE user = ?", [user.chat_id])
     rows = cur.fetchall()
     if len(rows) == 0:
         return user
@@ -184,7 +201,7 @@ def add_user(user):
         cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start) VALUES(?, ?, ?, ?, ?)",
                     user.list())
         cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
-                    [user.login, user.done])
+                    [user.chat_id, user.done])
     except Exception as e:
         print(e)
     commit(con)
@@ -199,7 +216,7 @@ def update_user(user):
     cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ? WHERE login = ?',
                 args)
     cur.execute('UPDATE reports SET done = ? WHERE login = ?',
-                [user.done, user.login])
+                [user.done, user.chat_id])
     commit(con)
     for i, u in enumerate(users):
         if u.login == user.login:

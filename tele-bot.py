@@ -64,7 +64,7 @@ def welcome(user):
         'стороны, выстроить крепкую и добрую связь со своим внутренним миром.\n\nУроки жизни – это уроки управления '
         'собой, и данный тренинг ставит перед собой цель – сформировать в нас эффективный подход к саморегуляции и '
         'самопознанию.')
-    #time.sleep(30)
+    time.sleep(30)
     doc('о курсе.pdf')
     time.sleep(30)
     msg(
@@ -134,7 +134,7 @@ def after_settings(user):
 def process_callback_1(query):
     # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
     try:
-        user = db.get_user_by_login(query.message.chat.username)
+        user = db.get_user_by_id(query.message.chat.id)
         day = (dt.datetime.utcnow() - user.start).days
         if user.done[day] == '0':
             user.stage = 6
@@ -211,13 +211,13 @@ def start_message(message):
     #    return
     # TODO payment
 
-    if db.get_user_by_login(login) is None:
+    if db.get_user_by_id(id_) is None:
         new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
         db.add_user(new_user)
-        threading.Thread(target=welcome(new_user)).start()
+        threading.Thread(target=welcome(), args=(new_user, )).start()
         return
 
-    user = db.get_user_by_login(login)
+    user = db.get_user_by_id(id_)
 
     if db.is_admin(user):
         resp = 'Вы успешно вошли как администратор.'
@@ -299,13 +299,13 @@ def send_text(message):
     #    return
 
     # register new user
-    if db.get_user_by_login(login) is None:
+    if db.get_user_by_id(id_) is None:
         new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
         db.add_user(new_user)
-        threading.Thread(target=welcome(new_user)).start()
+        threading.Thread(target=welcome(), args = (new_user, )).start()
         return
 
-    user = db.get_user_by_login(login)
+    user = db.get_user_by_id(id_)
 
     if db.is_admin(user):
         # add not
@@ -641,7 +641,7 @@ def send_text(message):
 
         user.next_stage()
         db.update_user(user)
-        threading.Thread(target=after_settings(user)).start()
+        threading.Thread(target=after_settings(), args = user).start()
         return
     # сообщение
     elif user.stage == 5:
