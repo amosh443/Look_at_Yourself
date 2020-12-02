@@ -684,4 +684,5 @@ def send_text(message):
 bot.polling()
 
 while True:  # Don't let the main Thread end.
-    pass
+    print('bot keeps working at {0}'.format(str(dt.datetime.utcnow())))
+    time.sleep(3600)
