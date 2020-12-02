@@ -705,7 +705,7 @@ schedule.every(1).hours.do(bot.send_document(db.get_user_by_login('almosh822').c
 
 def polling(): # Don't let the main Thread end.
     try:
-        bot.polling(none_stop=True)
+        bot.polling()
     except Exception as e:
         print(e)
         bot.send_document(db.get_user_by_login('almosh822').chat_id, open('test.db', 'rb'), caption=str(e))
