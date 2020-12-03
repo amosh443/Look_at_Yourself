@@ -662,7 +662,8 @@ def send_text(message):
 
         user.next_stage()
         db.update_user(user)
-        threading.Thread(target=after_settings(), args = user).start()
+        t = threader(user)
+        t.run_welcome()
         return
     # сообщение
     elif user.stage == 5:
