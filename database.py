@@ -113,7 +113,7 @@ def add_users_timing(user):  # times = [[hour, minute]]
     cur = con.cursor()
     for i, time in enumerate(user.times):
         cur.execute('INSERT INTO users_timings(login, number, hours, minutes) VALUES(?, ?, ?, ?)',
-                    [user.login, i, time[0], time[1]])
+                    [user.chat_id, i, time[0], time[1]])
     for i, u in enumerate(users):
         if u.login == user.login:
             users[i] = user
@@ -124,7 +124,7 @@ def add_users_timing(user):  # times = [[hour, minute]]
 def update_user_timing(user):
     con = sql.connect('test.db')
     cur = con.cursor()
-    cur.execute('DELETE FROM users_timings WHERE login = ?', [user.login])
+    cur.execute('DELETE FROM users_timings WHERE login = ?', [user.chat_id])
     commit(con)
     add_users_timing(user)
 
@@ -132,7 +132,7 @@ def update_user_timing(user):
 def get_user_timing(user):
     con = sql.connect('test.db')
     cur = con.cursor()
-    cur.execute("SELECT * FROM users_timings WHERE login = ?", [user.login])
+    cur.execute("SELECT * FROM users_timings WHERE login = ?", [user.chat_id])
     rows = cur.fetchall()
     rows.sort(key=lambda x: x[1])
     return rows
