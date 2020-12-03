@@ -46,6 +46,7 @@ time_diff = lambda first, second: (first - second + 24) % 24
 def welcome(user):
     def msg(message, markup=None):
         bot.send_message(user.chat_id, message, reply_markup=markup)
+        print('sent {0} to {1}'.format(message, user.login))
 
     def doc(path):
         for i in range(5):
@@ -82,6 +83,7 @@ def welcome(user):
 def after_settings(user):
     def msg(message, markup=None):
         bot.send_message(user.chat_id, message, reply_markup=markup)
+        print('sent {0} to {1}'.format(message, user.login))
 
     def doc(path):
         for i in range(5):
