@@ -196,6 +196,7 @@ def start_message(message):
 
     def msg(message, markup=None):
         bot.send_message(id_, message, reply_markup=markup)
+        print('sent {0} to {1}'.format(message, name))
 
     # inline_btn_1 = InlineKeyboardButton('Первая кнопка!', callback_data='sdss')
     # inline_kb1 = InlineKeyboardMarkup(True).add(inline_btn_1)
@@ -280,6 +281,7 @@ def send_text(message):
 
     def msg(message, markup=None):
         bot.send_message(id_, message, reply_markup=markup)
+        print('sent {0} to {1}'.format(message, name))
 
     def doc(document):
         if document is not None:
