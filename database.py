@@ -213,8 +213,8 @@ def update_user(user):
     con = sql.connect('test.db')
     cur = con.cursor()
     args = user.list()
-    args.append(user.login)
-    cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ? WHERE login = ?',
+    args.append(user.chat_id)
+    cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ? WHERE chat_id = ?',
                 args)
     cur.execute('UPDATE reports SET done = ? WHERE login = ?',
                 [user.done, user.chat_id])
