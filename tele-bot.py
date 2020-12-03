@@ -663,7 +663,7 @@ def send_text(message):
         user.next_stage()
         db.update_user(user)
         t = threader(user)
-        t.run_welcome()
+        t.run_as()
         return
     # сообщение
     elif user.stage == 5:
