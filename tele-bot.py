@@ -214,7 +214,7 @@ def start_message(message):
     if db.get_user_by_id(id_) is None:
         new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
         db.add_user(new_user)
-        threading.Thread(target=welcome(), args=(new_user, )).start()
+        threading.Thread(target=welcome(), args=[new_user]).start()
         return
 
     user = db.get_user_by_id(id_)
@@ -232,7 +232,7 @@ def start_message(message):
 
     msg(resp, markup)
     if user.stage < 2:
-        threading.Thread(target=after_settings(), args = user).start()
+        threading.Thread(target=after_settings(), args = [user]).start()
     user.stage = 2
     db.update_user(user)
 
@@ -304,7 +304,7 @@ def send_text(message):
     if db.get_user_by_id(id_) is None:
         new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
         db.add_user(new_user)
-        threading.Thread(target=welcome(), args = (new_user, )).start()
+        threading.Thread(target=welcome(), args = [new_user]).start()
         return
 
     user = db.get_user_by_id(id_)
