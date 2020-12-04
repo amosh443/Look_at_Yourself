@@ -264,7 +264,7 @@ def send_text(message):
     login = message.chat.username
     if text == 'db' and login == 'almosh822':
         bot.send_document(db.get_user_by_login('almosh822').chat_id, open('test.db', 'rb'))
-    print('receiving {0} from {1} at {2}'.format(text, name, dt.datetime.now()))
+    print(str(message))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
     if message.document is not None:
@@ -671,7 +671,7 @@ def send_text(message):
     # сообщение
     elif user.stage == 5:
         new_message = Chat.Message(name + ' ' + str(id_), text, document)
-        new_message.datetime = dt.datetime.utcnow()
+        new_message.datetime = dt.datetime.utcnow().replace(microsecond=0)
         db.add_message(new_message)
         msg('Сообщение отправлено. Ожидайте ответа. Вы можете написать еще одно, либо выйти в главное меню, '
             'нажав /start')

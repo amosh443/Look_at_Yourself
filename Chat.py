@@ -2,11 +2,11 @@ import datetime as dt
 
 
 class Message:
-    def __init__(self, login='', text='', attachment='', datetime=dt.datetime.utcnow(), id_=''):
+    def __init__(self, login='', text='', attachment='', datetime = dt.datetime.utcnow()):
         self.login = login
         self.text = text
         self.attachment = attachment
-        self.datetime = datetime.replace(microsecond=0)
+        self.datetime = datetime
         self.id = id
 
     def list(self):
