@@ -2,7 +2,7 @@ import datetime as dt
 
 
 class Message:
-    def __init__(self, login='', text='', attachment='', datetime = dt.datetime.utcnow()):
+    def __init__(self, login='', text='', attachment='', datetime=dt.datetime.utcnow()):
         self.login = login
         self.text = text
         self.attachment = attachment
