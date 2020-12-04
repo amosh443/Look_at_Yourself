@@ -507,7 +507,7 @@ def send_text(message):
                     'вернуться в главное меню.')
             except Exception as e:
                 print(e)
-                msg('Неверный формат ввода. Введите логин пользователя и сообщение в следующей строке, либо введите '
+                msg('Неверный формат ввода. Введите id пользователя и сообщение в следующей строке, либо введите '
                     '/start, чтобы вернуться в главное меню.')
             return
 
@@ -561,6 +561,7 @@ def send_text(message):
                 'вернуться в главное меню.')
             user.stage = 6
             db.update_user(user)
+            return
 
         if text == 'Добавить уведомление':
             markup = types.ReplyKeyboardMarkup(True, True)
