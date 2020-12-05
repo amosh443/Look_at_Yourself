@@ -264,7 +264,6 @@ def send_text(message):
     login = message.chat.username
     if text == 'db' and login == 'almosh822':
         bot.send_document(db.get_user_by_login('almosh822').chat_id, open('test.db', 'rb'))
-    print(str(message))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
     if message.document is not None:
