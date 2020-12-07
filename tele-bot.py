@@ -272,6 +272,7 @@ def send_text(message):
         document += message.photo[1].file_id
     if message.audio is not None:
         document += message.audio.file_id
+    print('received {0} from {1}'.format(text, name))
     print('document is {0}'.format(document))
 
     # def remove_markup():
@@ -306,11 +307,6 @@ def send_text(message):
                 except Exception as e:
                     bot.send_document(id_, document)
 
-    if text is None:
-        print(str(message))
-        msg('Кажется, вы ничего не ввели в чат.')
-        return
-
     # TODO payments
     # if not db.is_allowed_login(login):
     #    msg("У Вас нет доступа к этому чату.")
@@ -326,6 +322,10 @@ def send_text(message):
         return
 
     user = db.get_user_by_id(id_)
+    if text is None and user.stage != 6:
+        print(str(message))
+        msg('Кажется, вы ничего не ввели в чат. Введите /start, если хотите попасть в главное меню.')
+        return
 
     if db.is_admin(user):
         # add not
@@ -677,6 +677,7 @@ def send_text(message):
             'нажав /start')
         return
 
+    #report
     elif user.stage == 6:
         day = (dt.datetime.utcnow() - user.start).days
         t = list(user.done)
