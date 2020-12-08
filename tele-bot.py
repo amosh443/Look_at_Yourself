@@ -494,12 +494,12 @@ def send_text(message):
             return
 
         if user.stage == 6:
-            txt = text.split(sep='\n')
-            user = db.get_user_by_id(txt[0])
-            for i in range(2, len(txt)):
-                txt[1] += '\n' + txt[i]
             try:
-                bot.send_message(user.chat_id, txt[1])
+                txt = text.split(sep='\n')
+                user = db.get_user_by_id(txt[0])
+                for i in range(2, len(txt)):
+                    txt[1] += '\n' + txt[i]
+                    bot.send_message(user.chat_id, txt[1])
                 if document is not None and document != '':
                     bot.send_document(user.chat_id, document)
                 msg('Сообщение отправлено. Продолжайте отвечать пользователям, либо введите /start, чтобы '
