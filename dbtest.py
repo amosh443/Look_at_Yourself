@@ -11,22 +11,26 @@ import Programme
 import threading
 import datetime as dt
 import time
+import Interactive
 
-#token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
-token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
+# token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
-#os.system('git init')
-#os.system('git config --global user.email mr.almosh443@mail.ru')
-#os.system('git config --global user.name almosh443')
-#print('git inited')
+
+
+# os.system('git init')
+# os.system('git config --global user.email mr.almosh443@mail.ru')
+# os.system('git config --global user.name almosh443')
+# print('git inited')
 
 def commit(cur):
     cur.commit()
-    #os.system('git add test.db')
-    #print('git add')
-    #os.system('git commit -am "auto-commit"')
-    #print('git commit')
+    # os.system('git add test.db')
+    # print('git add')
+    # os.system('git commit -am "auto-commit"')
+    # print('git commit')
+
 
 def msg(user, message):
     all_links()
@@ -38,7 +42,8 @@ def msg(user, message):
         if link.name in message:
             if link.name == 'Метта' and 'Метта на себя' in message:
                 continue
-            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name), callback_data='link' + str(tmp)))
+            markup.add(
+                InlineKeyboardButton('Описание упражнения {0}'.format(link.name), callback_data='link' + str(tmp)))
             tmp += 1
     if 'Самоотчёт' in message:
         markup.add(InlineKeyboardButton('📝Отправить самоотчет', callback_data='done'))
@@ -62,6 +67,7 @@ def send(user, event):
 users = []
 events = []
 links = []
+polls = []
 
 
 def handle_events():
@@ -94,6 +100,7 @@ def handle_events():
                         send(user, event)
         time.sleep(60)
 
+
 def del_files():
     all_links()
     for link in links:
@@ -101,10 +108,11 @@ def del_files():
         update_link(link)
         print(link.text)
 
-def init():
 
+def init():
     thread = threading.Thread(target=handle_events)
     thread.start()
+    # del_files()
 
 
 def add_users_timing(user):  # times = [[hour, minute]]
@@ -175,6 +183,7 @@ def get_user_by_login(login):
     user.done = row[1]
     return user
 
+
 def get_user_by_id(id_):
     con = sql.connect('test.db')
     cur = con.cursor()
@@ -238,7 +247,7 @@ def add_link(link):
     cur = con.cursor()
     try:
         cur.execute("INSERT INTO links(name, text, attachment) VALUES(?, ?, ?)",
-                link.list())
+                    link.list())
         commit(con)
         links.append(link)
     except Exception as e:
@@ -296,6 +305,7 @@ def add_event(event):
     cur = con.cursor()
     cur.execute("INSERT INTO events(text, attachment, type, datetime, number) VALUES(?, ?, ?, ?, ?)",
                 event.fresh_list())
+    event.id_ = cur.lastrowid
     commit(con)
     events.append(event)
 
@@ -395,3 +405,89 @@ def delete_messages():
     cur = con.cursor()
     cur.execute('DELETE FROM messages')
     commit(con)
+
+
+def all_polls():
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute('SELECT * FROM questions')
+    rows = cur.fetchall()
+    polls.clear()
+    for row in rows:
+        polls.append(Interactive.from_list(row))
+
+    cur.execute('SELECT * FROM answers')
+    rows = cur.fetchall()
+    for row in rows:
+        for i, poll in enumerate(polls):
+            if poll.id == row[1]:
+                while len(poll.answers) < row[0] + 1:
+                    poll.answers.append('')
+                    poll.responses.append('')
+                poll.answers[row[0]] = row[2]
+                polls[i] = poll
+
+    cur.execute('SELECT * FROM responses')
+    rows = cur.fetchall()
+    for row in rows:
+        for i, poll in enumerate(polls):
+            if poll.id == row[1]:
+                while len(poll.answers) < row[0] + 1:
+                    poll.answers.append('')
+                    poll.responses.append('')
+                poll.responses[row[0]] = row[2]
+                polls[i] = poll
+
+    return polls
+
+
+def delete_poll(id_):
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute("DELETE FROM questions WHERE id = ?", [id_])
+    cur.execute("DELETE FROM answers WHERE question_id = ?", [id_])
+    cur.execute("DELETE FROM responses WHERE question_id = ?", [id_])
+    commit(con)
+    for i, e in enumerate(polls):
+        if e.id == id_:
+            polls.remove(e)
+
+
+def get_poll_by_id(id_):
+    for poll in polls:
+        if poll.id == id_:
+            return poll
+
+
+def update_poll(poll):
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute('UPDATE questions SET event_id = ?, text = ?, type = ? WHERE id = ?',
+                poll.list_questions())
+    cur.execute('DELETE FROM answers WHERE question_id = ?', [poll.id])
+    cur.execute('DELETE FROM responses WHERE question_id = ?', [poll.id])
+    for i, answer_list in enumerate(poll.list_answers()):
+        cur.execute('INSERT INTO answers(id, question_id, text) VALUES(?, ?, ?)', answer_list)
+    for i, response_list in enumerate(poll.list_responses()):
+        cur.execute('INSERT INTO responses(id, question_id, text) VALUES(?, ?, ?)', response_list)
+    con.commit()
+
+    for i, e in enumerate(polls):
+        if e.id == poll.id:
+            polls[i] = poll
+
+def add_poll(poll):
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute('INSERT INTO questions(event_id, text, type) VALUES (?, ?, ?)',
+                poll.list_to_add())
+    con.commit()
+    poll.id = cur.lastrowid
+    for answer_list in poll.list_answers():
+        cur.execute('INSERT INTO answers(id, question_id, text) VALUES(?, ?, ?)', answer_list)
+        con.commit()
+    for response_list in poll.list_responses():
+        cur.execute('INSERT INTO responses(id, question_id, text) VALUES(?, ?, ?)', response_list)
+        con.commit()
+    con.commit()
+    polls.append(poll)
