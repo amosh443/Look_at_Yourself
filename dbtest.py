@@ -74,6 +74,7 @@ def handle_events():
     all_users()
     all_events()
     all_links()
+    all_polls()
     while True:
         now_server = dt.datetime.utcnow()
         for user in users:
@@ -411,13 +412,22 @@ def all_polls():
     con = sql.connect('test.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM questions')
-    rows = cur.fetchall()
+    rows = []
+    rows.clear()
+    row = cur.fetchone()
+    while row:
+        rows.append(row)
+        row = cur.fetchone()
     polls.clear()
     for row in rows:
         polls.append(Interactive.from_list(row))
 
     cur.execute('SELECT * FROM answers')
-    rows = cur.fetchall()
+    rows.clear()
+    row = cur.fetchone()
+    while row:
+        rows.append(row)
+        row = cur.fetchone()
     for row in rows:
         for i, poll in enumerate(polls):
             if poll.id == row[1]:
@@ -428,7 +438,11 @@ def all_polls():
                 polls[i] = poll
 
     cur.execute('SELECT * FROM responses')
-    rows = cur.fetchall()
+    rows.clear()
+    row = cur.fetchone()
+    while row:
+        rows.append(row)
+        row = cur.fetchone()
     for row in rows:
         for i, poll in enumerate(polls):
             if poll.id == row[1]:
@@ -454,6 +468,7 @@ def delete_poll(id_):
 
 
 def get_poll_by_id(id_):
+    all_polls()
     for poll in polls:
         if poll.id == id_:
             return poll
