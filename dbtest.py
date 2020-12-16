@@ -501,13 +501,10 @@ def add_poll(poll):
     cur = con.cursor()
     cur.execute('INSERT INTO questions(event_id, text, type) VALUES (?, ?, ?)',
                 poll.list_to_add())
-    con.commit()
     poll.id = cur.lastrowid
     for answer_list in poll.list_answers():
         cur.execute('INSERT INTO answers(id, question_id, text) VALUES(?, ?, ?)', answer_list)
-        con.commit()
     for response_list in poll.list_responses():
         cur.execute('INSERT INTO responses(id, question_id, text) VALUES(?, ?, ?)', response_list)
-        con.commit()
     con.commit()
     polls.append(poll)

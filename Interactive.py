@@ -1,5 +1,5 @@
 class Poll:
-    def __init__(self, event_id=0, question='', answers=[], responses=[], type=0, id=0):
+    def __init__(self, event_id=0, question='', answers='', responses='', type=0, id=0):
         self.event_id = event_id
         self.question = question
         self.answers = answers
