@@ -113,11 +113,11 @@ class threader:
                     time.sleep(5)
 
         msg(
-            'Наше первое задание – определиться с тем, насколько мы внимательны в повседневной жизни. ✅\nДавайте ответим '
-            'на простые вопросы и заодно проанализируем свои привычки. Можете записать свои ответы, чтобы потом сравнить '
-            'их с ответами на те же вопросы по окончании курса.\nВозможно, мысль о повторном ответе смотивирует сразу '
-            'определить для себя области, которые нуждаются в изменениях и аспекты, в которых мы эти изменения ждём и '
-            'желаем получить.\n')
+            'Наше первое задание – определиться с тем, насколько мы внимательны в повседневной жизни. ✅\nДавайте '
+            'ответим на простые вопросы и заодно проанализируем свои привычки. Можете записать свои ответы, '
+            'чтобы потом сравнить их с ответами на те же вопросы по окончании курса.\nВозможно, мысль о повторном '
+            'ответе смотивирует сразу определить для себя области, которые нуждаются в изменениях и аспекты, '
+            'в которых мы эти изменения ждём и желаем получить.\n')
         doc('упр проверка внимания.pdf')
         time.sleep(180)
         msg('Сегодня мы будем только знакомиться с курсом и основными понятиями. Сама программа начнётся завтра.')
@@ -180,6 +180,17 @@ def process_callback_1(query):
                 bot.send_photo(query.message.chat.id, file)
             except Exception as e:
                 bot.send_document(query.message.chat.id, file)
+    except Exception as e:
+        print(e)
+
+
+@bot.callback_query_handler(lambda query: 'poll' in query.data)
+def process_callback_1(query):
+    # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
+    try:
+        nums = [int(s) for s in query.data.split() if s.isdigit()]
+        poll = db.get_poll_by_id(nums[0])
+        bot.send_message(query.message.chat.id, poll.responses.split(sep='\n')[nums[1]])
     except Exception as e:
         print(e)
 
@@ -254,7 +265,7 @@ def start_message(message):
     db.update_user(user)
 
 
-@bot.message_handler(content_types=['text', 'document', 'photo', 'audio'])
+@bot.message_handler(content_types=['text', 'document', 'photo', 'audio', 'voice'])
 def send_text(message):
     print(str(message))
     text = message.text
@@ -353,7 +364,8 @@ def send_text(message):
                 else:
                     markup = types.ReplyKeyboardMarkup(True, True)
                     markup.row('Настраиваемое напоминание', 'Промежуточное напоминание', 'Другое сообщение')
-                    msg('Неверный формат ввода. Попробуйте еще раз или введите /start для выхода в главное меню.', markup)
+                    msg('Неверный формат ввода. Попробуйте еще раз или введите /start для выхода в главное меню.',
+                        markup)
                     return
 
             if user.stage == 2:
@@ -420,7 +432,8 @@ def send_text(message):
                         num = nums[0]
                         if '@#' in text:
                             db.delete_event(num)
-                            msg('Сообщение №{0} успешно удалено. Вы можете продолжить просматривать/изменять сообщения.\n'
+                            msg(
+                                'Сообщение №{0} успешно удалено. Вы можете продолжить просматривать/изменять сообщения.\n'
                                 'Либо введите /start для выхода в главное меню.'.format(num))
                             return
                         else:
@@ -442,7 +455,8 @@ def send_text(message):
                                 event.datetime.replace(hour=nums[2])
                                 event.datetime.replace(minute=nums[3])
                             db.update_event(event)
-                            msg('Сообщение №{0} успешно изменено. Вы можете продолжить просматривать/изменять сообщения.\n'
+                            msg(
+                                'Сообщение №{0} успешно изменено. Вы можете продолжить просматривать/изменять сообщения.\n'
                                 'Либо введите /start для выхода в главное меню.'.format(num))
                             return
                     except Exception as e:
@@ -472,7 +486,8 @@ def send_text(message):
                 except Exception as e:
                     markup = types.ReplyKeyboardMarkup(True, True)
                     markup.row('Покажи недавние другие сообщения')
-                    msg('Неверный формат ввода. Введите день, для которого хотите просмотреть напоминания. Для выхода в '
+                    msg(
+                        'Неверный формат ввода. Введите день, для которого хотите просмотреть напоминания. Для выхода в '
                         'меню введите /start', markup)
                     return
 
@@ -481,7 +496,8 @@ def send_text(message):
                     if day == event.day:
                         if event.type == 1:
                             msg('№ {0}\nНомер дня и время {1} {2}\nТекст: {3}'.
-                                format(event.id_, str(int(event.datetime.strftime('%Y'))), event.datetime.strftime('%H %M'),
+                                format(event.id_, str(int(event.datetime.strftime('%Y'))),
+                                       event.datetime.strftime('%H %M'),
                                        event.text))
                             doc(event.attachment)
                         if event.type == 0:
@@ -523,7 +539,8 @@ def send_text(message):
                 for i in range(2, len(txt)):
                     txt[1] += '\n' + txt[i]
                 db.add_link(Links.Link(txt[0], txt[1], document))
-                msg('Ссылка для упражнения {0} успешно добавлена. Вы можете добавить еще ссылки, либо введите /start для '
+                msg(
+                    'Ссылка для упражнения {0} успешно добавлена. Вы можете добавить еще ссылки, либо введите /start для '
                     'выхода в главное меню.'.format(txt[0]))
                 return
 
@@ -557,24 +574,25 @@ def send_text(message):
                     if '@#' in text:
                         txt = nums[0]
                         db.delete_poll(txt)
-                        msg('Интерактив № {0} успешно удален. Вы можете продолжить изменять/удалять интерактивные сообщения.\n'
-                            'Либо введите /start для выхода в главное меню.'.format(txt))
+                        msg('Интерактив № {0} успешно удален. Вы можете продолжить изменять/удалять интерактивные '
+                            'сообщения.\n Либо введите /start для выхода в главное меню.'.format(txt))
                         return
                     txt = text.split(sep='\n')
                     poll = db.get_poll_by_id(nums[0])
                     txt[0] = txt[0].split()[0]
                     poll.type = 0 if txt[0] == 'Опрос' else 1
-                    poll.question = txt[1]
-                    poll.answers.clear()
-                    poll.responses.clear()
-                    for i in range(2, len(txt)):
+                    poll.event = txt[1]
+                    poll.question = txt[2]
+                    poll.answers = ''
+                    poll.responses = ''
+                    for i in range(3, len(txt)):
                         st = txt[i].split(sep='(')
-                        poll.answers.append(st[0])
-                        poll.responses.append(st[1][:-1])
+                        poll.answers += st[0] + '\n'
+                        poll.responses += st[1][:-1] + '\n'
 
                     db.update_poll(poll)
-                    msg('Интерактивное сообщение № {0} успешно изменено. Вы можете продолжить изменять/удалять интерактивы.\n'
-                        'Либо введите /start для выхода в главное меню.'.format(poll.id))
+                    msg('Интерактивное сообщение № {0} успешно изменено. Вы можете продолжить изменять/удалять '
+                        'интерактивы.\n Либо введите /start для выхода в главное меню.'.format(poll.id))
                 except Exception as e:
                     msg('Неверный формат ввода. Чтобы изменить интерактив, скопируйте его в поле ввода и '
                         'отправьте отредактированный вариант. Для удаления интерактива введите его id и @#. '
@@ -585,17 +603,19 @@ def send_text(message):
             if user.stage == 10:
                 txt = text.split(sep='\n')
                 if len(txt) < 2 or len(txt[0]) == 0 or len(txt[1]) == 0:
-                    msg('Неверный формат ввода. Введите тип интерактива(Опрос или Кнопки), в следующей строке вопрос и в '
-                        'последующих строках варианты ответов с реакциями на них в скобках. Например:\nОпрос\nВсё ли вам '
-                        'понятно?\nДа(Отлично! Завтра приступаем к основной программе. До встречи!)\nНажмите /start для '
-                        'выхода в главное меню.')
+                    msg('Неверный формат ввода. Введите тип интерактива(Опрос или Кнопки), в следующей строке '
+                        'день и порядковый номер/время, в следующей строке вопрос и в последующих строках варианты '
+                        'ответов с реакциями на них в скобках. Например:\nОпрос\n1 16 00\nВсё ли вам понятно?\nДа('
+                        'Отлично! Завтра приступаем к основной программе. До встречи!)\nНажмите /start для выхода в '
+                        'главное меню.')
                     return
-                poll = Interactive.Poll(type = 0 if txt[0] == 'Опрос' else 1)
-                poll.question = txt[1]
-                for i in range(2, len(txt)):
+                poll = Interactive.Poll(type=0 if txt[0] == 'Опрос' else 1)
+                poll.event = txt[1]
+                poll.question = txt[2]
+                for i in range(3, len(txt)):
                     st = txt[i].split(sep='(')
-                    poll.answers.append(st[0])
-                    poll.responses.append(st[1][:-1])
+                    poll.answers += st[0] + '\n'
+                    poll.responses += st[1][:-1] + '\n'
                 db.add_poll(poll)
                 msg('Интерактив успешно добавлен. Вы можете добавить еще интерактивы, либо введите /start для '
                     'выхода в главное меню.')
@@ -608,8 +628,9 @@ def send_text(message):
                 for m in messages:
                     t = m.login.split()
                     msg('{0} {3} в {1} написал:\n{2}'.format(t[0], m.datetime, m.text, t[1]))
-                msg('Чтобы ответить, введите id пользователя и сообщение в следующей строке, либо введите /start, чтобы '
-                    'вернуться в главное меню.')
+                msg(
+                    'Чтобы ответить, введите id пользователя и сообщение в следующей строке, либо введите /start, '
+                    'чтобы вернуться в главное меню.')
                 user.stage = 6
                 db.update_user(user)
                 return
@@ -631,8 +652,9 @@ def send_text(message):
                 return
 
             if text == 'Добавить ссылку':
-                msg('Введите название упражнения, для которого хотите добавить ссылку, в следующей строке его описание и '
-                    'приложите документ, если необходимо.')
+                msg(
+                    'Введите название упражнения, для которого хотите добавить ссылку, в следующей строке его '
+                    'описание и приложите документ, если необходимо.')
                 user.stage = 7
                 db.update_user(user)
                 return
@@ -642,8 +664,9 @@ def send_text(message):
                 for link in links:
                     msg('{0}\n{1}'.format(link.name, link.text))
                     doc(link.attachment)
-                msg('Показаны все ссылки.\nЧтобы изменить ссылку, скопируйте ее в поле ввода и отправьте отредактированный '
-                    'вариант. Вы можете приложить документ, чтобы добавить его к ссылке\n'
+                msg(
+                    'Показаны все ссылки.\nЧтобы изменить ссылку, скопируйте ее в поле ввода и отправьте '
+                    'отредактированный вариант. Вы можете приложить документ, чтобы добавить его к ссылке\n'
                     'Для удаления ссылки введите название упражнения и @#. Например, Самоотчет @#\n'
                     'Нажмите /start для выхода в главное меню.')
                 user.stage = 8
@@ -655,9 +678,9 @@ def send_text(message):
                 for poll in polls:
                     res = ''
                     res += 'Опрос' if poll.type == 0 else 'Кнопки'
-                    res += ' № ' + str(poll.id) + '\n' + poll.question + '\n'
-                    for i in range(len(poll.answers)):
-                        res += poll.answers[i] + '(' + poll.responses[i] + ')' + '\n'
+                    res += ' № ' + str(poll.id) + '\n' + poll.event + '\n' + poll.question + '\n'
+                    for i in range(len(poll.answers.split(sep='\n'))):
+                        res += poll.answers.split(sep='\n')[i] + '(' + poll.responses.split(sep='\n')[i] + ')' + '\n'
                     msg(res)
 
                 msg('Показаны все интерактивные сообщения.\nЧтобы изменить интерактив, скопируйте его в поле ввода и '
@@ -668,9 +691,10 @@ def send_text(message):
                 return
 
             if text == 'Добавить интерактив':
-                msg('Введите тип интерактива(Опрос или Кнопки), в следующей строке вопрос и в последующих '
-                    'строках варианты ответов с реакциями на них в скобках. Например:\nОпрос\nВсё ли вам понятно?\nДа ('
-                    'Отлично! Завтра приступаем к основной программе. До встречи!)')
+                msg('Введите тип интерактива(Опрос или Кнопки), в следующей строке день и порядковый номер/время,'
+                    'в следующей строке вопрос и в последующих строках варианты ответов с реакциями на них в скобках. '
+                    'Например:\nОпрос\n1 16 00\nВсё ли вам понятно?\nДа (Отлично! Завтра приступаем к основной '
+                    'программе. До встречи!)')
                 user.stage = 10
                 db.update_user(user)
                 return
@@ -734,7 +758,8 @@ def send_text(message):
             for p in times:
                 t = dt.time(p[0], p[1])
                 resp += t.strftime('%H:%M') + '\n'
-            msg('Настройки времени успешно установлены. Вы будете получать ежедневные уведомления о практике в\n' + resp)
+            msg(
+                'Настройки времени успешно установлены. Вы будете получать ежедневные уведомления о практике в\n' + resp)
             if user.stage == 4:
                 user.stage = 2
                 db.update_user(user)
@@ -812,6 +837,7 @@ def send_text(message):
             return
     except Exception as e:
         msg('Что-то пошло не так. Попробуйте еще раз или нажмите /start для выхода в главное меню.')
+        print(e)
         return
 
     msg('Что-то пошло не так. Попробуйте еще раз или нажмите /start для выхода в главное меню.')

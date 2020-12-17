@@ -11,25 +11,28 @@ import Programme
 import threading
 import datetime as dt
 import time
+import Interactive
 
-#token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c" #older token
+# token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
 token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 
 bot = telebot.TeleBot(token)
-#os.system('git init')
-#os.system('git config --global user.email mr.almosh443@mail.ru')
-#os.system('git config --global user.name almosh443')
-#print('git inited')
+
+
+# os.system('git init')
+# os.system('git config --global user.email mr.almosh443@mail.ru')
+# os.system('git config --global user.name almosh443')
+# print('git inited')
 
 def commit(cur):
     cur.commit()
-    #os.system('git add test.db')
-    #print('git add')
-    #os.system('git commit -am "auto-commit"')
-    #print('git commit')
+    # os.system('git add test.db')
+    # print('git add')
+    # os.system('git commit -am "auto-commit"')
+    # print('git commit')
+
 
 def msg(user, message):
-    all_links()
     markup = InlineKeyboardMarkup(True)
     print('sending {0} to {1} at {2}'.format(message, user.login, dt.datetime.now()))
     tmp = 0
@@ -46,6 +49,7 @@ def msg(user, message):
                                                                                                               + str(
                 tmp)))
             tmp += 1
+
     if 'Самоотчёт' in message:
         markup.add(InlineKeyboardButton('📝Отправить самоотчет', callback_data='done'))
     bot.send_message(user.chat_id, message, reply_markup=markup)
@@ -64,18 +68,49 @@ def send(user, event):
     if event.attachment is not None:
         doc(user, event.attachment)
 
+    for i, poll in enumerate(polls):
+        nums = [int(s) for s in poll.event.split()]
+        if nums[0] == event.datetime.year:
+            if event.id_ == event_for_poll[i]:
+                answers = []
+                for i, answer in enumerate(poll.answers.split(sep='\n')):
+                    if poll.type == 0:
+                        answers.append([{'text' : answer, 'callback_data' : 'poll {0} {1}'.format(poll.id, i)}])
+                        #answers.append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                    else:
+                        if len(answers) == 0:
+                            answers.append([])
+                        #answers[0].append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                        answers[0].append({'text': answer, 'callback_data': 'poll {0} {1}'.format(poll.id, i)})
+                markup = InlineKeyboardMarkup()
+                markup.keyboard = answers
+                bot.send_message(user.chat_id, poll.question, reply_markup=markup)
+
 
 users = []
 events = []
 links = []
+polls = []
+event_for_poll = []
 
 
 def handle_events():
     all_users()
     all_events()
     all_links()
+    all_polls()
     while True:
         now_server = dt.datetime.utcnow()
+        # map polls to events
+        for i, poll in enumerate(polls):
+            nums = [int(s) for s in poll.event.split()]
+            for event in events:
+                if nums[0] == event.datetime.year:
+                    if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
+                            (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
+                                2] == event.datetime.hour):
+                        event_for_poll[i] = event.id_
+
         for user in users:
             timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
             now = now_server.replace(hour=(now_server.hour + user.time_diff) % 24)
@@ -100,6 +135,7 @@ def handle_events():
                         send(user, event)
         time.sleep(60)
 
+
 def del_files():
     all_links()
     for link in links:
@@ -107,10 +143,11 @@ def del_files():
         update_link(link)
         print(link.text)
 
-def init():
 
+def init():
     thread = threading.Thread(target=handle_events)
     thread.start()
+    # del_files()
 
 
 def add_users_timing(user):  # times = [[hour, minute]]
@@ -181,6 +218,7 @@ def get_user_by_login(login):
     user.done = row[1]
     return user
 
+
 def get_user_by_id(id_):
     con = sql.connect('test.db')
     cur = con.cursor()
@@ -244,7 +282,7 @@ def add_link(link):
     cur = con.cursor()
     try:
         cur.execute("INSERT INTO links(name, text, attachment) VALUES(?, ?, ?)",
-                link.list())
+                    link.list())
         commit(con)
         links.append(link)
     except Exception as e:
@@ -302,6 +340,7 @@ def add_event(event):
     cur = con.cursor()
     cur.execute("INSERT INTO events(text, attachment, type, datetime, number) VALUES(?, ?, ?, ?, ?)",
                 event.fresh_list())
+    event.id_ = cur.lastrowid
     commit(con)
     events.append(event)
 
@@ -401,3 +440,55 @@ def delete_messages():
     cur = con.cursor()
     cur.execute('DELETE FROM messages')
     commit(con)
+
+
+def all_polls():
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute('SELECT * FROM polls')
+    rows = cur.fetchall()
+    polls.clear()
+    for row in rows:
+        polls.append(Interactive.from_list(row))
+        event_for_poll.append(0)
+
+    return polls
+
+
+def delete_poll(id_):
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute("DELETE FROM polls WHERE id = ?", [id_])
+    con.commit()
+    for i, e in enumerate(polls):
+        if e.id == id_:
+            polls.remove(e)
+
+
+def get_poll_by_id(id_):
+    all_polls()
+    for poll in polls:
+        if poll.id == id_:
+            return poll
+
+
+def update_poll(poll):
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute('UPDATE polls SET event = ?, question = ?, type = ?, answers = ?, responses = ? WHERE id = ?',
+                poll.list())
+    con.commit()
+
+    for i, e in enumerate(polls):
+        if e.id == poll.id:
+            polls[i] = poll
+
+
+def add_poll(poll):
+    con = sql.connect('test.db')
+    cur = con.cursor()
+    cur.execute('INSERT INTO polls(event, question, type, answers, responses) VALUES (?, ?, ?, ?, ?)',
+                poll.list_to_add())
+    poll.id = cur.lastrowid
+    con.commit()
+    polls.append(poll)

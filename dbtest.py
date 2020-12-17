@@ -33,7 +33,6 @@ def commit(cur):
 
 
 def msg(user, message):
-    all_links()
     markup = InlineKeyboardMarkup(True)
     print('sending {0} to {1} at {2}'.format(message, user.login, dt.datetime.now()))
     tmp = 0
@@ -50,6 +49,7 @@ def msg(user, message):
                                                                                                               + str(
                 tmp)))
             tmp += 1
+
     if 'Самоотчёт' in message:
         markup.add(InlineKeyboardButton('📝Отправить самоотчет', callback_data='done'))
     bot.send_message(user.chat_id, message, reply_markup=markup)
@@ -68,11 +68,30 @@ def send(user, event):
     if event.attachment is not None:
         doc(user, event.attachment)
 
+    for i, poll in enumerate(polls):
+        nums = [int(s) for s in poll.event.split()]
+        if nums[0] == event.datetime.year:
+            if event.id_ == event_for_poll[i]:
+                answers = []
+                for i, answer in enumerate(poll.answers.split(sep='\n')):
+                    if poll.type == 0:
+                        answers.append([{'text' : answer, 'callback_data' : 'poll {0} {1}'.format(poll.id, i)}])
+                        #answers.append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                    else:
+                        if len(answers) == 0:
+                            answers.append([])
+                        #answers[0].append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                        answers[0].append({'text': answer, 'callback_data': 'poll {0} {1}'.format(poll.id, i)})
+                markup = InlineKeyboardMarkup()
+                markup.keyboard = answers
+                bot.send_message(user.chat_id, poll.question, reply_markup=markup)
+
 
 users = []
 events = []
 links = []
 polls = []
+event_for_poll = []
 
 
 def handle_events():
@@ -82,6 +101,16 @@ def handle_events():
     all_polls()
     while True:
         now_server = dt.datetime.utcnow()
+        # map polls to events
+        for i, poll in enumerate(polls):
+            nums = [int(s) for s in poll.event.split()]
+            for event in events:
+                if nums[0] == event.datetime.year:
+                    if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
+                            (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
+                                2] == event.datetime.hour):
+                        event_for_poll[i] = event.id_
+
         for user in users:
             timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
             now = now_server.replace(hour=(now_server.hour + user.time_diff) % 24)
@@ -416,46 +445,12 @@ def delete_messages():
 def all_polls():
     con = sql.connect('test.db')
     cur = con.cursor()
-    cur.execute('SELECT * FROM questions')
-    rows = []
-    rows.clear()
-    row = cur.fetchone()
-    while row:
-        rows.append(row)
-        row = cur.fetchone()
+    cur.execute('SELECT * FROM polls')
+    rows = cur.fetchall()
     polls.clear()
     for row in rows:
         polls.append(Interactive.from_list(row))
-
-    cur.execute('SELECT * FROM answers')
-    rows.clear()
-    row = cur.fetchone()
-    while row:
-        rows.append(row)
-        row = cur.fetchone()
-    for row in rows:
-        for i, poll in enumerate(polls):
-            if poll.id == row[1]:
-                while len(poll.answers) < row[0] + 1:
-                    poll.answers.append('')
-                    poll.responses.append('')
-                poll.answers[row[0]] = row[2]
-                polls[i] = poll
-
-    cur.execute('SELECT * FROM responses')
-    rows.clear()
-    row = cur.fetchone()
-    while row:
-        rows.append(row)
-        row = cur.fetchone()
-    for row in rows:
-        for i, poll in enumerate(polls):
-            if poll.id == row[1]:
-                while len(poll.answers) < row[0] + 1:
-                    poll.answers.append('')
-                    poll.responses.append('')
-                poll.responses[row[0]] = row[2]
-                polls[i] = poll
+        event_for_poll.append(0)
 
     return polls
 
@@ -463,10 +458,8 @@ def all_polls():
 def delete_poll(id_):
     con = sql.connect('test.db')
     cur = con.cursor()
-    cur.execute("DELETE FROM questions WHERE id = ?", [id_])
-    cur.execute("DELETE FROM answers WHERE question_id = ?", [id_])
-    cur.execute("DELETE FROM responses WHERE question_id = ?", [id_])
-    commit(con)
+    cur.execute("DELETE FROM polls WHERE id = ?", [id_])
+    con.commit()
     for i, e in enumerate(polls):
         if e.id == id_:
             polls.remove(e)
@@ -482,29 +475,20 @@ def get_poll_by_id(id_):
 def update_poll(poll):
     con = sql.connect('test.db')
     cur = con.cursor()
-    cur.execute('UPDATE questions SET event_id = ?, text = ?, type = ? WHERE id = ?',
-                poll.list_questions())
-    cur.execute('DELETE FROM answers WHERE question_id = ?', [poll.id])
-    cur.execute('DELETE FROM responses WHERE question_id = ?', [poll.id])
-    for i, answer_list in enumerate(poll.list_answers()):
-        cur.execute('INSERT INTO answers(id, question_id, text) VALUES(?, ?, ?)', answer_list)
-    for i, response_list in enumerate(poll.list_responses()):
-        cur.execute('INSERT INTO responses(id, question_id, text) VALUES(?, ?, ?)', response_list)
+    cur.execute('UPDATE polls SET event = ?, question = ?, type = ?, answers = ?, responses = ? WHERE id = ?',
+                poll.list())
     con.commit()
 
     for i, e in enumerate(polls):
         if e.id == poll.id:
             polls[i] = poll
 
+
 def add_poll(poll):
     con = sql.connect('test.db')
     cur = con.cursor()
-    cur.execute('INSERT INTO questions(event_id, text, type) VALUES (?, ?, ?)',
+    cur.execute('INSERT INTO polls(event, question, type, answers, responses) VALUES (?, ?, ?, ?, ?)',
                 poll.list_to_add())
     poll.id = cur.lastrowid
-    for answer_list in poll.list_answers():
-        cur.execute('INSERT INTO answers(id, question_id, text) VALUES(?, ?, ?)', answer_list)
-    for response_list in poll.list_responses():
-        cur.execute('INSERT INTO responses(id, question_id, text) VALUES(?, ?, ?)', response_list)
     con.commit()
     polls.append(poll)
