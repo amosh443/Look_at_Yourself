@@ -99,40 +99,48 @@ def handle_events():
     all_events()
     all_links()
     all_polls()
-    while True:
-        now_server = dt.datetime.utcnow()
-        # map polls to events
-        for i, poll in enumerate(polls):
-            nums = [int(s) for s in poll.event.split()]
-            for event in events:
-                if nums[0] == event.datetime.year:
-                    if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
-                            (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
-                                2] == event.datetime.hour):
-                        event_for_poll[i] = event.id_
 
-        for user in users:
-            timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
-            now = now_server.replace(hour=(now_server.hour + user.time_diff) % 24)
-            day = (now - user.start).days
-            for event in events:
-                event_time = event.datetime
-                # print(now.hour, event_time.hour, now.minute, event_time.minute)
-                if event.type == 0:
-                    if day == event_time.year and len(timing) > event.number and \
-                            timing[event.number][2] == now.hour and now.minute == timing[event.number][3]:
-                        send(user, event)
+    def work():
+        while True:
+            now_server = dt.datetime.utcnow()
+            # map polls to events
+            for i, poll in enumerate(polls):
+                nums = [int(s) for s in poll.event.split()]
+                for event in events:
+                    if nums[0] == event.datetime.year:
+                        if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
+                                (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
+                                    2] == event.datetime.hour):
+                            event_for_poll[i] = event.id_
 
-                elif event.type == 1:
-                    if day == event_time.year and now.hour == event_time.hour \
-                            and now.minute == event_time.minute:
-                        send(user, event)
+            for user in users:
+                timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
+                now = now_server.replace(hour=(now_server.hour + user.time_diff) % 24)
+                day = (now - user.start).days
+                for event in events:
+                    event_time = event.datetime
+                    # print(now.hour, event_time.hour, now.minute, event_time.minute)
+                    if event.type == 0:
+                        if day == event_time.year and len(timing) > event.number and \
+                                timing[event.number][2] == now.hour and now.minute == timing[event.number][3]:
+                            send(user, event)
 
-                else:
-                    # print(now.day, event_time.day, now.hour, event_time.hour, now.minute, event_time.minute)
-                    if now.day == event_time.day and now.hour == event_time.hour \
-                            and now.minute == event_time.minute:
-                        send(user, event)
+                    elif event.type == 1:
+                        if day == event_time.year and now.hour == event_time.hour \
+                                and now.minute == event_time.minute:
+                            send(user, event)
+
+                    else:
+                        # print(now.day, event_time.day, now.hour, event_time.hour, now.minute, event_time.minute)
+                        if now.day == event_time.day and now.hour == event_time.hour \
+                                and now.minute == event_time.minute:
+                            send(user, event)
+            time.sleep(60)
+
+    try:
+        work()
+    except Exception as e:
+        print(e)
         time.sleep(60)
 
 
