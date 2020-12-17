@@ -10,7 +10,7 @@ from functools import wraps
 
 import Chat
 import Links
-import dbtest as db
+import database as db
 
 import telebot
 from telebot import types
