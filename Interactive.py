@@ -3,10 +3,10 @@ class Poll:
         self.event = event
         self.question = question
         self.answers = answers
-        if self.answers[-1] == '\n':
+        if self.answers != '' and self.answers[-1] == '\n':
             self.answers = answers[:-1]
         self.responses = responses
-        if self.responses[-1] == '\n':
+        if self.responses != '' and self.responses[-1] == '\n':
             self.responses = self.responses[:-1]
         self.type = type
         self.id = id
