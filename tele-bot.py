@@ -186,7 +186,7 @@ def process_callback_1(query):
 
 @bot.callback_query_handler(lambda query: 'poll' in query.data)
 def process_callback_1(query):
-    # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
+    bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
     try:
         nums = [int(s) for s in query.data.split() if s.isdigit()]
         poll = db.get_poll_by_id(nums[0])
@@ -275,7 +275,7 @@ def send_text(message):
     name = message.chat.first_name
     login = message.chat.username
     if text == 'db' and login == 'almosh822':
-        bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'))
+        bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'), caption='<b>db</b>')
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
     if message.document is not None:
@@ -580,7 +580,7 @@ def send_text(message):
                     txt = text.split(sep='\n')
                     poll = db.get_poll_by_id(nums[0])
                     txt[0] = txt[0].split()[0]
-                    poll.type = 0 if txt[0] == 'Опрос' else 1
+                    poll.type = 0 if 'Опрос' in txt[0] else 1
                     poll.event = txt[1]
                     poll.question = txt[2]
                     poll.answers = ''
