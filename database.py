@@ -26,7 +26,7 @@ bot = telebot.TeleBot(token)
 
 def commit(cur):
     cur.commit()
-    # os.system('git add test.db')
+    # os.system('git add db.db')
     # print('git add')
     # os.system('git commit -am "auto-commit"')
     # print('git commit')
@@ -71,7 +71,7 @@ def send(user, event):
     for i, poll in enumerate(polls):
         nums = [int(s) for s in poll.event.split()]
         if nums[0] == event.datetime.year:
-            if event.id_ == event_for_poll[i]:
+            if event.id_ == event_for_poll[poll.id]:
                 answers = []
                 for i, answer in enumerate(poll.answers.split(sep='\n')):
                     if poll.type == 0:
@@ -91,7 +91,7 @@ users = []
 events = []
 links = []
 polls = []
-event_for_poll = []
+event_for_poll = {}
 
 
 def handle_events():
@@ -104,14 +104,6 @@ def handle_events():
         while True:
             now_server = dt.datetime.utcnow()
             # map polls to events
-            for i, poll in enumerate(polls):
-                nums = [int(s) for s in poll.event.split()]
-                for event in events:
-                    if nums[0] == event.datetime.year:
-                        if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
-                                (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
-                                    2] == event.datetime.hour):
-                            event_for_poll[i] = event.id_
 
             for user in users:
                 timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
@@ -159,7 +151,7 @@ def init():
 
 
 def add_users_timing(user):  # times = [[hour, minute]]
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     for i, time in enumerate(user.times):
         cur.execute('INSERT INTO users_timings(login, number, hours, minutes) VALUES(?, ?, ?, ?)',
@@ -172,7 +164,7 @@ def add_users_timing(user):  # times = [[hour, minute]]
 
 
 def update_user_timing(user):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('DELETE FROM users_timings WHERE login = ?', [str(user.chat_id)])
     commit(con)
@@ -180,7 +172,7 @@ def update_user_timing(user):
 
 
 def get_user_timing(user):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("SELECT * FROM users_timings WHERE login = ?", [str(user.chat_id)])
     rows = cur.fetchall()
@@ -189,14 +181,14 @@ def get_user_timing(user):
 
 
 def add_allowed_login(login):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('INSERT INTO allowed_logins(login) VALUES(?)', [login])
     commit(con)
 
 
 def get_allowed_logins():
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("SELECT * FROM allowed_logins")
     rows = cur.fetchall()
@@ -210,7 +202,7 @@ def is_allowed_login(login):
 
 
 def get_user_by_login(login):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("SELECT * FROM users WHERE login = ?", [login])
     rows = cur.fetchall()
@@ -228,7 +220,7 @@ def get_user_by_login(login):
 
 
 def get_user_by_id(id_):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("SELECT * FROM users WHERE chat_id = ?", [id_])
     rows = cur.fetchall()
@@ -246,7 +238,7 @@ def get_user_by_id(id_):
 
 
 def add_user(user):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     try:
         cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start) VALUES(?, ?, ?, ?, ?)",
@@ -261,7 +253,7 @@ def add_user(user):
 
 
 def update_user(user):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     args = user.list()
     args.append(str(user.chat_id))
@@ -276,7 +268,7 @@ def update_user(user):
 
 
 def all_users():
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM users')
     rows = cur.fetchall()
@@ -286,7 +278,7 @@ def all_users():
 
 
 def add_link(link):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     try:
         cur.execute("INSERT INTO links(name, text, attachment) VALUES(?, ?, ?)",
@@ -298,7 +290,7 @@ def add_link(link):
 
 
 def update_link(link):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     args = link.list()
     args.append(link.name)
@@ -311,7 +303,7 @@ def update_link(link):
 
 
 def all_links():
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM links')
     rows = cur.fetchall()
@@ -322,7 +314,7 @@ def all_links():
 
 
 def get_link_by_name(name):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM links WHERE name = ?', [name])
     rows = cur.fetchall()
@@ -333,7 +325,7 @@ def get_link_by_name(name):
 
 
 def delete_link(name):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("DELETE FROM links WHERE name = ?",
                 [name])
@@ -344,7 +336,7 @@ def delete_link(name):
 
 
 def add_event(event):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("INSERT INTO events(text, attachment, type, datetime, number) VALUES(?, ?, ?, ?, ?)",
                 event.fresh_list())
@@ -354,7 +346,7 @@ def add_event(event):
 
 
 def add_test_event(event):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("INSERT INTO test_events(text, attachment, type, datetime, number) VALUES(?, ?, ?, ?, ?)",
                 event.fresh_list())
@@ -362,7 +354,7 @@ def add_test_event(event):
 
 
 def delete_event(id_):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("DELETE FROM events WHERE id = ?",
                 [id_])
@@ -373,7 +365,7 @@ def delete_event(id_):
 
 
 def all_events():
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM events')
     rows = cur.fetchall()
@@ -384,7 +376,7 @@ def all_events():
 
 
 def get_event_by_id(id_):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM events WHERE id = ?', [id_])
     rows = cur.fetchall()
@@ -392,7 +384,7 @@ def get_event_by_id(id_):
 
 
 def update_event(event):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     args = event.list()
     cur.execute('UPDATE events SET text = ?, attachment = ?, type = ?, datetime = ?, number = ? WHERE id = ?',
@@ -404,14 +396,14 @@ def update_event(event):
 
 
 def add_admin(login):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('INSERT INTO admins(login) VALUES(?)', [login])
     commit(con)
 
 
 def get_admins():
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("SELECT * FROM admins")
     rows = cur.fetchall()
@@ -425,7 +417,7 @@ def is_admin(user):
 
 
 def add_message(message):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("INSERT INTO messages(login, text, attachment, datetime) VALUES(?, ?, ?, ?)",
                 message.list())
@@ -433,7 +425,7 @@ def add_message(message):
 
 
 def all_messages():
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM messages')
     rows = cur.fetchall()
@@ -444,27 +436,34 @@ def all_messages():
 
 
 def delete_messages():
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('DELETE FROM messages')
     commit(con)
 
 
 def all_polls():
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('SELECT * FROM polls')
     rows = cur.fetchall()
     polls.clear()
     for row in rows:
-        polls.append(Interactive.from_list(row))
-        event_for_poll.append(0)
+        poll = Interactive.from_list(row)
+        polls.append(poll)
+        nums = [int(s) for s in poll.event.split()]
+        for event in events:
+            if nums[0] == event.datetime.year:
+                if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
+                        (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
+                            2] == event.datetime.hour):
+                    event_for_poll[poll.id] = event.id_
 
     return polls
 
 
 def delete_poll(id_):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("DELETE FROM polls WHERE id = ?", [id_])
     con.commit()
@@ -481,7 +480,7 @@ def get_poll_by_id(id_):
 
 
 def update_poll(poll):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('UPDATE polls SET event = ?, question = ?, type = ?, answers = ?, responses = ? WHERE id = ?',
                 poll.list())
@@ -493,11 +492,17 @@ def update_poll(poll):
 
 
 def add_poll(poll):
-    con = sql.connect('test.db')
+    con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute('INSERT INTO polls(event, question, type, answers, responses) VALUES (?, ?, ?, ?, ?)',
                 poll.list_to_add())
     poll.id = cur.lastrowid
     con.commit()
     polls.append(poll)
-    event_for_poll.append(0)
+    nums = [int(s) for s in poll.event.split()]
+    for event in events:
+        if nums[0] == event.datetime.year:
+            if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
+                    (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
+                        2] == event.datetime.hour):
+                event_for_poll[poll.id] = event.id_
