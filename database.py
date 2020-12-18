@@ -500,3 +500,4 @@ def add_poll(poll):
     poll.id = cur.lastrowid
     con.commit()
     polls.append(poll)
+    event_for_poll.append(0)
