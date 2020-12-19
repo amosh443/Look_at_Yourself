@@ -85,13 +85,15 @@ def send(user, event):
                 markup = InlineKeyboardMarkup()
                 markup.keyboard = answers
                 bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
+    # print('send successful')
+    return
 
 
 users = []
 events = []
 links = []
 polls = []
-event_for_poll = {}
+event_for_poll = []
 
 
 def handle_events():
@@ -116,6 +118,7 @@ def handle_events():
                         if day == event_time.year and len(timing) > event.number and \
                                 timing[event.number][2] == now.hour and now.minute == timing[event.number][3]:
                             send(user, event)
+                            print('sent ok')
 
                     elif event.type == 1:
                         if day == event_time.year and now.hour == event_time.hour \
@@ -442,6 +445,17 @@ def delete_messages():
     commit(con)
 
 
+def map_poll_to_event(poll):
+    nums = [int(s) for s in poll.event.split()]
+    for event in events:
+        if nums[0] == event.datetime.year:
+            if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
+                    (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
+                        2] == event.datetime.hour):
+                while len(event_for_poll) < poll.id + 1:
+                    event_for_poll.append(0)
+                event_for_poll[poll.id] = event.id_
+
 def all_polls():
     con = sql.connect('db.db')
     cur = con.cursor()
@@ -451,13 +465,8 @@ def all_polls():
     for row in rows:
         poll = Interactive.from_list(row)
         polls.append(poll)
-        nums = [int(s) for s in poll.event.split()]
-        for event in events:
-            if nums[0] == event.datetime.year:
-                if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
-                        (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
-                            2] == event.datetime.hour):
-                    event_for_poll[poll.id] = event.id_
+        map_poll_to_event(poll)
+
 
     return polls
 
@@ -489,6 +498,7 @@ def update_poll(poll):
     for i, e in enumerate(polls):
         if e.id == poll.id:
             polls[i] = poll
+    map_poll_to_event(poll)
 
 
 def add_poll(poll):
@@ -499,10 +509,4 @@ def add_poll(poll):
     poll.id = cur.lastrowid
     con.commit()
     polls.append(poll)
-    nums = [int(s) for s in poll.event.split()]
-    for event in events:
-        if nums[0] == event.datetime.year:
-            if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
-                    (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
-                        2] == event.datetime.hour):
-                event_for_poll[poll.id] = event.id_
+    map_poll_to_event(poll)
