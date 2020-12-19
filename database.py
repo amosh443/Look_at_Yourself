@@ -72,21 +72,23 @@ def send(user, event):
         nums = [int(s) for s in poll.event.split()]
         if nums[0] == event.datetime.year:
             if event.id_ == event_for_poll[poll.id]:
-                answers = []
-                for i, answer in enumerate(poll.answers.split(sep='\n')):
-                    if poll.type == 0:
-                        answers.append([{'text' : answer, 'callback_data' : 'poll {0} {1}'.format(poll.id, i)}])
-                        #answers.append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
-                    else:
+                markup = None
+                if poll.type == 1:
+                    answers = []
+                    for i, answer in enumerate(poll.answers.split(sep='\n')):
                         if len(answers) == 0:
                             answers.append([])
-                        #answers[0].append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                        # answers[0].append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
                         answers[0].append({'text': answer, 'callback_data': 'poll {0} {1}'.format(poll.id, i)})
-                markup = InlineKeyboardMarkup()
-                markup.keyboard = answers
+                    markup = InlineKeyboardMarkup()
+                    markup.keyboard = answers
+                else:
+                    markup = InlineKeyboardMarkup(True)
+                    for i, answer in enumerate(poll.answers.split(sep='\n')):
+                        markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
                 bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
     # print('send successful')
-    return
+    # return
 
 
 users = []
@@ -118,7 +120,7 @@ def handle_events():
                         if day == event_time.year and len(timing) > event.number and \
                                 timing[event.number][2] == now.hour and now.minute == timing[event.number][3]:
                             send(user, event)
-                            print('sent ok')
+                            # print('sent ok')
 
                     elif event.type == 1:
                         if day == event_time.year and now.hour == event_time.hour \
@@ -447,13 +449,13 @@ def delete_messages():
 
 def map_poll_to_event(poll):
     nums = [int(s) for s in poll.event.split()]
+    while len(event_for_poll) < poll.id + 1:
+        event_for_poll.append(0)
     for event in events:
         if nums[0] == event.datetime.year:
             if (len(nums) == 2 and event.type == 0 and nums[1] == event.number) or \
                     (len(nums) == 3 and event.type == 1 and nums[1] == event.datetime.hour and nums[
-                        2] == event.datetime.hour):
-                while len(event_for_poll) < poll.id + 1:
-                    event_for_poll.append(0)
+                        2] == event.datetime.minute):
                 event_for_poll[poll.id] = event.id_
 
 def all_polls():

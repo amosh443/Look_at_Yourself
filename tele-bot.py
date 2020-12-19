@@ -186,11 +186,11 @@ def process_callback_1(query):
 
 @bot.callback_query_handler(lambda query: 'poll' in query.data)
 def process_callback_1(query):
-    bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
     try:
         nums = [int(s) for s in query.data.split() if s.isdigit()]
         poll = db.get_poll_by_id(nums[0])
         bot.send_message(query.message.chat.id, poll.responses.split(sep='\n')[nums[1]])
+        bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
     except Exception as e:
         print(e)
 
