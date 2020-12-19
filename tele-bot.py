@@ -580,7 +580,6 @@ def send_text(message):
                         return
                     txt = text.split(sep='\n')
                     poll = db.get_poll_by_id(nums[0])
-                    txt[0] = txt[0].split()[0]
                     poll.type = 0 if 'Опрос' in txt[0] else 1
                     poll.event = txt[1]
                     poll.question = txt[2]
@@ -610,7 +609,7 @@ def send_text(message):
                         'Отлично! Завтра приступаем к основной программе. До встречи!)\nНажмите /start для выхода в '
                         'главное меню.')
                     return
-                poll = Interactive.Poll(type=0 if txt[0] == 'Опрос' else 1)
+                poll = Interactive.Poll(type=0 if 'Опрос' in txt[0] else 1)
                 poll.event = txt[1]
                 poll.question = txt[2]
                 for i in range(3, len(txt)):
