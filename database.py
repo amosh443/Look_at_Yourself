@@ -84,7 +84,7 @@ def send(user, event):
                         answers[0].append({'text': answer, 'callback_data': 'poll {0} {1}'.format(poll.id, i)})
                 markup = InlineKeyboardMarkup()
                 markup.keyboard = answers
-                bot.send_message(user.chat_id, '<b>' + poll.question + '</b>', reply_markup=markup)
+                bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
 
 
 users = []
