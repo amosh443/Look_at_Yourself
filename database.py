@@ -64,7 +64,12 @@ def doc(user, documents):
 
 
 def send(user, event):
-    msg(user, event.text)
+    try:
+        msg(user, event.text)
+    except Exception as e:
+        if 'blocked' in str(e):
+            delete_user(user)
+
     if event.attachment is not None:
         doc(user, event.attachment)
 
@@ -257,6 +262,18 @@ def add_user(user):
     commit(con)
     users.append(user)
     update_user_timing(user)
+
+
+def delete_user(user):
+    con = sql.connect('db.db')
+    cur = con.cursor()
+    try:
+        cur.execute("DELETE FROM users WHERE chat_id = ?", [user.chat_id])
+        cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
+                    [str(user.chat_id), user.done])
+    except Exception as e:
+        print(e)
+    commit(con)
 
 
 def update_user(user):
@@ -460,6 +477,7 @@ def map_poll_to_event(poll):
                         2] == event.datetime.minute):
                 event_for_poll[poll.id] = event.id_
 
+
 def all_polls():
     con = sql.connect('db.db')
     cur = con.cursor()
@@ -470,7 +488,6 @@ def all_polls():
         poll = Interactive.from_list(row)
         polls.append(poll)
         map_poll_to_event(poll)
-
 
     return polls
 
