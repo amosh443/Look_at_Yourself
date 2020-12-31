@@ -147,6 +147,8 @@ def handle_events():
             time.sleep(60)
             repeat_work()
 
+    repeat_work()
+
 
 def del_files():
     all_links()
