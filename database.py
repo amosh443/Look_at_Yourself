@@ -134,11 +134,13 @@ def handle_events():
                             send(user, event)
             time.sleep(60)
 
-    try:
-        work()
-    except Exception as e:
-        print(e)
-        time.sleep(60)
+    def repeat_work():
+        try:
+            work()
+        except Exception as e:
+            print(e)
+            time.sleep(60)
+            repeat_work()
 
 
 def del_files():
