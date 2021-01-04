@@ -844,7 +844,13 @@ def send_text(message):
 
 
 def backup():
-    bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'))
+    for i in range(6):
+        try:
+            bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'))
+            break
+        except Exception as e:
+            print(e)
+            time.sleep(5)
 
 
 schedule.every(1).hours.do(backup)
