@@ -41,10 +41,10 @@ def msg(user, message):
         if link.name in message:
             if link.name == 'Метта' and 'Метта на себя' in message:
                 continue
-            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name if link.name != 'Трехминутную '
+            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name if link.name != 'Трёхминутную '
                                                                                                        'дыхательную '
                                                                                                        'медитацию'
-                                                                             else 'Трехминутная дыхательная '
+                                                                             else 'Трёхминутная дыхательная '
                                                                                   'медитация'), callback_data='link'
                                                                                                               + str(
                 tmp)))
