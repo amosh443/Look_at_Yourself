@@ -271,8 +271,8 @@ def delete_user(user):
     cur = con.cursor()
     try:
         cur.execute("DELETE FROM users WHERE chat_id = ?", [user.chat_id])
-        cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
-                    [str(user.chat_id), user.done])
+        cur.execute("DELETE FROM reports WHERE login = ?",
+                    [str(user.chat_id)])
     except Exception as e:
         print(e)
     commit(con)

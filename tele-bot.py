@@ -223,10 +223,10 @@ def start_message(message):
 
     # remove_markup()
     markup = types.ReplyKeyboardMarkup(True, True)
-    markup.row('Настройки', 'Обратная связь', 'FAQ')
+    markup.row('Настройки', 'Обратная связь', 'Начать заново')
     resp = 'Вы успешно вошли в главное меню.\nНажмите Настройки для просмотра/изменения часового пояса и времени ' \
-           'ежедневных напоминаний.\nНажмите Обратная связь для общения с администрацией.\nНажмите FAQ для просмотра ' \
-           'ответов на часто задаваемые вопросы.\n '
+           'ежедневных напоминаний.\nНажмите Обратная связь для общения с администрацией.\nНажмите Начать заново, ' \
+           'чтобы чтобы запустить всю программу сначала'
 
     # if not db.is_allowed_login(login):
 
@@ -799,6 +799,13 @@ def send_text(message):
                         f = open('puzzles/{0}.jpg'.format(day // 7), 'rb')
                         doc(f)
             return
+        elif user.stage == 7 and text == 'Да':
+            db.delete_user(user)
+            new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
+            db.add_user(new_user)
+            t = threader(new_user)
+            t.run_welcome()
+            return
 
         if text == 'Настройки':
             markup = types.ReplyKeyboardMarkup(True, True)
@@ -832,8 +839,12 @@ def send_text(message):
             db.update_user(user)
             return
 
-        if text == 'FAQ':
-            msg('Тут будет FAQ\nНажмите /start для выхода в главное меню.')
+        if text == 'Начать заново':
+            user.stage = 7
+            markup = types.ReplyKeyboardMarkup(True, True)
+            markup.row('Да')
+            msg('Вы точно хотите начать заново? Это действие нельзя будет отменить.', markup)
+            db.update_user(user)
             return
     except Exception as e:
         msg('Что-то пошло не так. Попробуйте еще раз или нажмите /start для выхода в главное меню.')
