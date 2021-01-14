@@ -775,6 +775,7 @@ def send_text(message):
             new_message = Chat.Message(name + ' ' + str(id_), text, document)
             new_message.datetime = dt.datetime.utcnow().replace(microsecond=0)
             db.add_message(new_message)
+            bot.send_message(149035168, 'Получено новое сообщение от пользователя.')
             msg('Сообщение отправлено. Ожидайте ответа. Вы можете написать еще одно, либо выйти в главное меню, '
                 'нажав /start')
             return
