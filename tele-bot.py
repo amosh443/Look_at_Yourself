@@ -224,9 +224,9 @@ def start_message(message):
     # remove_markup()
     markup = types.ReplyKeyboardMarkup(True, True)
     markup.row('Настройки', 'Обратная связь', 'Начать заново')
-    resp = 'Вы успешно вошли в главное меню.\nНажмите Настройки для просмотра/изменения часового пояса и времени ' \
-           'ежедневных напоминаний.\nНажмите Обратная связь для общения с администрацией.\nНажмите Начать заново, ' \
-           'чтобы чтобы запустить всю программу сначала'
+    resp = 'Вы вошли в меню\n\nНажмите «Настройки», чтобы посмотреть или изменить время ежедневных напоминаний и ' \
+           'часового пояса.\n\nНажмите «Обратная связь», чтобы написать нам.\n\nНажмите «Начать заново», если хотите, ' \
+           'чтобы курс запустился с самого начала. '
 
     # if not db.is_allowed_login(login):
 
@@ -518,7 +518,7 @@ def send_text(message):
                     user = db.get_user_by_id(txt[0])
                     for i in range(2, len(txt)):
                         txt[1] += '\n' + txt[i]
-                        bot.send_message(user.chat_id, txt[1])
+                    bot.send_message(user.chat_id, txt[1])
                     if document is not None and document != '':
                         bot.send_document(user.chat_id, document)
                     msg('Сообщение отправлено. Продолжайте отвечать пользователям, либо введите /start, чтобы '
