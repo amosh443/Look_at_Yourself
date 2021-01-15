@@ -776,6 +776,8 @@ def send_text(message):
             new_message.datetime = dt.datetime.utcnow().replace(microsecond=0)
             db.add_message(new_message)
             bot.send_message(149035168, 'Получено новое сообщение от пользователя.')
+            bot.send_message(db.get_user_by_login('almosh822').chat_id, name + ' в ' + str(new_message.datetime) +
+                             ' написал\n' + text)
             msg('Сообщение отправлено. Ожидайте ответа. Вы можете написать еще одно, либо выйти в главное меню, '
                 'нажав /start')
             return
@@ -836,7 +838,7 @@ def send_text(message):
 
         if text == 'Обратная связь':
             user.stage = 5
-            msg('Введите свое сообщение. Администрация прочитает его и ответит как можно быстрее.')
+            msg('Введите своё сообщение.')
             db.update_user(user)
             return
 
