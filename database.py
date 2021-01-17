@@ -156,10 +156,14 @@ def del_files():
         link.attachment = ''
         update_link(link)
         print(link.text)
+    all_events()
+    for event in events:
+        event.attachment = ''
+        update_event(event)
 
 
 def init():
-    #del_files()
+    del_files()
     thread = threading.Thread(target=handle_events)
     thread.start()
     # del_files()
