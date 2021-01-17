@@ -159,6 +159,7 @@ def del_files():
 
 
 def init():
+    #del_files()
     thread = threading.Thread(target=handle_events)
     thread.start()
     # del_files()
