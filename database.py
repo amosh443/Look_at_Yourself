@@ -101,7 +101,7 @@ events = []
 links = []
 polls = []
 event_for_poll = []
-
+allowed_logins = []
 
 def handle_events():
     all_users()
@@ -204,6 +204,7 @@ def add_allowed_login(login):
     cur = con.cursor()
     cur.execute('INSERT INTO allowed_logins(login) VALUES(?)', [login])
     commit(con)
+    allowed_logins.append(login)
 
 
 def get_allowed_logins():
@@ -211,8 +212,8 @@ def get_allowed_logins():
     cur = con.cursor()
     cur.execute("SELECT * FROM allowed_logins")
     rows = cur.fetchall()
-    result = [row[0] for row in rows]
-    return result
+    allowed_logins = [str(row[0]) for row in rows]
+    return allowed_logins
 
 
 def is_allowed_login(login):
