@@ -167,6 +167,9 @@ class threader:
                     print(e)
                     time.sleep(5)
 
+        msg('Вы можете ознакомиться с курсом, его содержанием, актуальностью и преимуществами в прикрепленном файле')
+        doc('О курсе.pdf')
+        time.sleep(300)
         msg(
             'Оплачивая онлайн-курс, вы соглашаетесь с «Политикой обработки персональных данных и '
             'конфиденциальности» и условиями «Публичной оферты».')
@@ -175,7 +178,7 @@ class threader:
         bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
                          provider_token=payment_token, currency='RUB', photo_url=None,
                          need_phone_number=False, need_email=False, is_flexible=False,
-                         prices=[LabeledPrice(label='Доступ к боту', amount=10000)], start_parameter='p',
+                         prices=[LabeledPrice(label='Доступ к боту', amount=600000)], start_parameter='p',
                          invoice_payload='paid')
 
 
