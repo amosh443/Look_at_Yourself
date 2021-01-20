@@ -20,8 +20,8 @@ import time as timing
 
 # token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
 token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
-payment_token = '390540012:LIVE:14126'
-#payment_token = '381764678:TEST:21892'#test
+#payment_token = '390540012:LIVE:14126'
+payment_token = '381764678:TEST:21892'#test
 
 bot = telebot.TeleBot(token)
 
@@ -188,14 +188,14 @@ def checkout(query):
 @bot.message_handler(content_types=['successful_payment'])
 def got_payment(message):
     try:
-        new_user = User.User(chat_id=message.chat.id, login=message.chat.username + ' ' + message.chat.first_name, start=dt.datetime.utcnow())
+        new_user = User.User(chat_id=message.chat.id, login=str(message.chat.username) + ' ' + str(message.chat.first_name), start=dt.datetime.utcnow())
         db.add_allowed_login(new_user.chat_id)
-        bot.send_message(149035168, 'Новый пользователь оплатил бота. id для связи:\n' + str(new_user.chat_id))
-        bot.send_message(db.get_user_by_login('almosh822').chat_id, 'Новый пользователь оплатил бота. id для связи:\n' + str(new_user.chat_id))
+        bot.send_message(149035168, 'Новый пользователь оплатил бота. id для связи:\n' + str(new_user.chat_id))#to Timur
+        bot.send_message(475542187, 'Новый пользователь оплатил бота. id для связи:\n' + str(new_user.chat_id))#to almosh
         db.add_user(new_user)
-        print(new_user.login + ' paid successfully')
         t = threader(new_user)
         t.run_welcome()
+        print(new_user.login + ' paid successfully')
     except Exception as e:
         print(str(e) + '\nwhile adding user')
 
@@ -336,9 +336,8 @@ def send_text(message):
     id_ = message.chat.id
     name = message.chat.first_name
     login = message.chat.username
-    if text == 'db' and login == 'almosh822':
-        bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'))
-        bot.send_message(db.get_user_by_login('almosh822').chat_id, '*bald text*', parse_mode='Markdown')
+    if text == 'db' and id_ == 475542187:
+        bot.send_document(475542187, open('db.db', 'rb'))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
     if message.document is not None:
@@ -838,7 +837,7 @@ def send_text(message):
             new_message.datetime = dt.datetime.utcnow().replace(microsecond=0)
             db.add_message(new_message)
             bot.send_message(149035168, 'Получено новое сообщение от пользователя.')
-            bot.send_message(db.get_user_by_login('almosh822').chat_id, name + ' в ' + str(new_message.datetime) +
+            bot.send_message(475542187, name + ' в ' + str(new_message.datetime) +
                              ' написал\n' + text)
             msg('Сообщение отправлено. Ожидайте ответа. Вы можете написать еще одно, либо выйти в главное меню, '
                 'нажав /start')
@@ -922,7 +921,7 @@ def send_text(message):
 def backup():
     for i in range(6):
         try:
-            bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'))
+            bot.send_document(475542187, open('db.db', 'rb'))
             break
         except Exception as e:
             print(e)
@@ -946,7 +945,7 @@ def polling():  # Don't let the main Thread end.
         bot.polling()
     except Exception as e:
         print(e)
-        bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'), caption=str(e))
+        bot.send_document(475542187, open('db.db', 'rb'), caption=str(e))
         time.sleep(5)
 
 
