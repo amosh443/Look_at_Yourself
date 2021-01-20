@@ -20,8 +20,8 @@ import time as timing
 
 # token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
 token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
-#payment_token = '390540012:LIVE:14126'
-payment_token = '381764678:TEST:21892'#test
+payment_token = '390540012:LIVE:14126'
+#payment_token = '381764678:TEST:21892'#test
 
 bot = telebot.TeleBot(token)
 
