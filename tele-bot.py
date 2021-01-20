@@ -175,6 +175,8 @@ class threader:
             'конфиденциальности» и условиями «Публичной оферты».')
         doc('Политика обработки персональных данных и конфиденциальности.pdf')
         doc('Публичная оферта.pdf')
+        msg('Если вам нужно время, чтобы обдумать или подготовиться, то вы можете оставить бота в чатах Telegram, '
+            'чтобы не потерять, а оплатить и начать обучение позднее.')
         bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
                          provider_token=payment_token, currency='RUB', photo_url=None,
                          need_phone_number=False, need_email=False, is_flexible=False,
