@@ -118,7 +118,7 @@ def handle_events():
         while True:
             now_server = dt.datetime.utcnow()
 
-            if now_server.hour == 12 and now_server.minute == 18:#19:45 msk
+            if now_server.hour == 16 and now_server.minute == 45:#19:45 msk
                 for ap in awaiting_payment:#ap = [['id 0/1', date]
                     diff = now_server - ap[1]
                     if diff.days == 7:
