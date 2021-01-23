@@ -1,7 +1,7 @@
 import os
 import sqlite3 as sql
 
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
 
 import Chat
 import Links
@@ -15,6 +15,8 @@ import Interactive
 
 # token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
 token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+payment_token = '390540012:LIVE:14126'
+#payment_token = '381764678:TEST:21892'#test
 
 bot = telebot.TeleBot(token)
 
@@ -102,17 +104,56 @@ links = []
 polls = []
 event_for_poll = []
 allowed_logins = []
+awaiting_payment = []
+
 
 def handle_events():
     all_users()
     all_events()
     all_links()
     all_polls()
+    all_awaiting_payment()
 
     def work():
         while True:
             now_server = dt.datetime.utcnow()
-            # map polls to events
+
+            if now_server.hour == 12 and now_server.minute == 18:#19:45 msk
+                for ap in awaiting_payment:#ap = [['id 0/1', date]
+                    diff = now_server - ap[1]
+                    if diff.days == 7:
+                        delete_awaiting_payment(ap)
+                        ap = ap[0].split()
+                        id_ = int(ap[0])
+
+                        def remind():
+                            bot.send_message(id_,
+                                             'Здравствуйте!\nВы интересовались курсом осознанности, но не решились его приобрести. Вас '
+                                             'что-то смутило? Подробная информация о курсе: https://lookatyourself.turbo.site/\n Если у '
+                                             'вас остались вопросы, то можете написать нам через меню бота или на почту '
+                                             'letitbelab@yandex.ru\n\nВы можете посмотреть отзывы участников '
+                                             'курса\nhttps://www.youtube.com/channel/UCux9e3yIla2f5WdsOeN45xA/about\n\nЦена курса всё '
+                                             'ещё 6000, вместо 8000. ')
+                            bot.send_invoice(id_, title='Оплата доступа к боту.', description='Оплатить курс',
+                                             provider_token=payment_token, currency='RUB', photo_url=None,
+                                             need_phone_number=False, need_email=False, is_flexible=False,
+                                             prices=[LabeledPrice(label='Доступ к боту', amount=600000)],
+                                             start_parameter='p',
+                                             invoice_payload='paid')
+                            time.sleep(3600)
+                            markup = InlineKeyboardMarkup(True)
+                            markup.add(InlineKeyboardButton('Да', callback_data='remind'))
+                            markup.add(InlineKeyboardButton('Нет', callback_data='nope'))
+                            bot.send_message(id_, 'Напомнить вам о приобретении курса ещё через неделю?', reply_markup=markup)
+                        if(ap[1] == '0'):
+                            threading.Thread(target=remind).start()
+                        else:
+                            bot.send_message(id_, 'Здравствуйте! Вы просили напомнить о возможности начать курс. '
+                                                  'Время пришло.\n\nПодробная информация о курсе: '
+                                                  'https://lookatyourself.turbo.site/\nЕсли у вас созрел вопрос, '
+                                                  'то можете написать нам через меню бота или на почту '
+                                                  'letitbelab@yandex.ru\n\nОтзывы участников '
+                                                  'курса\nhttps://www.youtube.com/channel/UCux9e3yIla2f5WdsOeN45xA/about')
 
             for user in users:
                 timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
@@ -539,3 +580,35 @@ def add_poll(poll):
     con.commit()
     polls.append(poll)
     map_poll_to_event(poll)
+
+def add_awaiting_payment(id_, type):#type = ' 0/1'
+    try:
+        con = sql.connect('db.db')
+        cur = con.cursor()
+        id_ = str(id_) + type
+        now = dt.datetime.utcnow().replace(hour=0, minute=0, microsecond=0)
+        for ap in awaiting_payment:
+            if ap[0] == id_:
+                return
+        cur.execute('INSERT INTO awaiting_payment(chat_id, date) VALUES (?, ?)',
+                    [id_, now])
+        con.commit()
+        awaiting_payment.append([id_, now])
+    except Exception as e:
+        print(e + '\nin add_awaiting_payment')
+
+def delete_awaiting_payment(ap):
+    con = sql.connect('db.db')
+    cur = con.cursor()
+    cur.execute("DELETE FROM awaiting_payment WHERE chat_id = ?", [ap[0]])
+    con.commit()
+    awaiting_payment.remove(ap)
+
+def all_awaiting_payment():
+    con = sql.connect('db.db')
+    cur = con.cursor()
+    cur.execute("SELECT * FROM awaiting_payment")
+    rows = cur.fetchall()
+    awaiting_payment.clear()
+    for row in rows:
+        awaiting_payment.append([row[0], dt.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')])

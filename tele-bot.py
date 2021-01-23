@@ -146,12 +146,18 @@ class threader:
         time.sleep(1800)
         msg('И последнее на сегодня очень важное понятие, которым мы будем пользоваться\n❗️Ум новичка')
         doc('Ум новичка.pdf')
+        poll = db.get_poll_by_id(0)
+        markup = InlineKeyboardMarkup(True)
+        for i, answer in enumerate(poll.answers.split(sep='\n')):
+            markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+        bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
 
     def run_before_payment(self):
-        threading.Thread(target=self.before_payment()).start()
+        threading.Thread(target=self.before_payment).start()
 
     def before_payment(self):
         user = self.user
+        db.add_awaiting_payment(user.chat_id, ' 0')
         def msg(message, markup=None):
             bot.send_message(user.chat_id, message, reply_markup=markup)
             print('sent {0} to {1}'.format(message, user.login))
@@ -199,6 +205,7 @@ def got_payment(message):
         bot.send_message(149035168, 'Новый пользователь оплатил бота. id для связи:\n' + str(new_user.chat_id))#to Timur
         bot.send_message(475542187, 'Новый пользователь оплатил бота. id для связи:\n' + str(new_user.chat_id))#to almosh
         db.add_user(new_user)
+        db.delete_awaiting_payment(new_user.chat_id)
         t = threader(new_user)
         t.run_welcome()
         print(new_user.login + ' paid successfully')
@@ -261,6 +268,15 @@ def process_callback_1(query):
         print(e)
 
 
+@bot.callback_query_handler(lambda query: 'remind' in query.data)
+def process_callback_1(query):
+    try:
+        bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
+        db.add_awaiting_payment(query.message.chat.id, ' 1')
+    except Exception as e:
+        print(e)
+
+
 @bot.message_handler(commands=['help', 'start'])
 def start_message(message):
     text = message.text
@@ -295,7 +311,7 @@ def start_message(message):
            'чтобы курс запустился с самого начала. '
 
     if not db.is_allowed_login(str(id_)):
-        new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
+        new_user = User.User(chat_id=id_, login=login)
         t = threader(new_user)
         t.run_before_payment()
         return
@@ -410,6 +426,7 @@ def send_text(message):
     try:
         if db.is_admin(user):
             # add not
+
             if user.stage == 1:
                 if text == 'Настраиваемое напоминание':
                     msg('Введите день, в который придет напоминание, его порядковый номер, '
