@@ -283,6 +283,7 @@ def start_message(message):
     id_ = message.chat.id
     name = message.chat.first_name
     login = message.chat.username
+    print(message)
 
     def msg(message, markup=None):
         bot.send_message(id_, message, reply_markup=markup)
