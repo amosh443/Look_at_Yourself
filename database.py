@@ -125,6 +125,7 @@ def handle_events():
                         delete_awaiting_payment(ap)
                         ap = ap[0].split()
                         id_ = int(ap[0])
+                        print('sent reminder to ' + str(id_))
 
                         def remind():
                             bot.send_message(id_,
