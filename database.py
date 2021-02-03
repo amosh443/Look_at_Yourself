@@ -28,6 +28,7 @@ bot = telebot.TeleBot(token)
 
 def commit(cur):
     cur.commit()
+    bot.send_document(475542187, open('db.db', 'rb'), caption='db changed')
     # os.system('git add db.db')
     # print('git add')
     # os.system('git commit -am "auto-commit"')
