@@ -547,7 +547,7 @@ def delete_poll(id_):
     con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("DELETE FROM polls WHERE id = ?", [id_])
-    con.commit()
+    commit(con)
     for i, e in enumerate(polls):
         if e.id == id_:
             polls.remove(e)
@@ -565,7 +565,7 @@ def update_poll(poll):
     cur = con.cursor()
     cur.execute('UPDATE polls SET event = ?, question = ?, type = ?, answers = ?, responses = ? WHERE id = ?',
                 poll.list())
-    con.commit()
+    commit(con)
 
     for i, e in enumerate(polls):
         if e.id == poll.id:
@@ -579,7 +579,7 @@ def add_poll(poll):
     cur.execute('INSERT INTO polls(event, question, type, answers, responses) VALUES (?, ?, ?, ?, ?)',
                 poll.list_to_add())
     poll.id = cur.lastrowid
-    con.commit()
+    commit(con)
     polls.append(poll)
     map_poll_to_event(poll)
 
@@ -594,7 +594,7 @@ def add_awaiting_payment(id_, type):#type = ' 0/1'
                 return
         cur.execute('INSERT INTO awaiting_payment(chat_id, date) VALUES (?, ?)',
                     [id_, now])
-        con.commit()
+        commit(con)
         awaiting_payment.append([id_, now])
     except Exception as e:
         print(e + '\nin add_awaiting_payment')
@@ -603,7 +603,7 @@ def delete_awaiting_payment(ap):
     con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("DELETE FROM awaiting_payment WHERE chat_id = ?", [ap[0]])
-    con.commit()
+    commit(con)
     awaiting_payment.remove(ap)
 
 def all_awaiting_payment():
