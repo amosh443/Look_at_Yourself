@@ -142,6 +142,12 @@ def handle_events():
                                              prices=[LabeledPrice(label='Доступ к боту', amount=600000)],
                                              start_parameter='p',
                                              invoice_payload='paid')
+                            bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
+                                             provider_token=payment_token, currency='RUB', photo_url=None,
+                                             need_phone_number=False, need_email=False, is_flexible=False,
+                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=100000)],
+                                             start_parameter='p',
+                                             invoice_payload='paid')
                             time.sleep(3600)
                             markup = InlineKeyboardMarkup(True)
                             markup.add(InlineKeyboardButton('Да', callback_data='remind'))
@@ -156,6 +162,18 @@ def handle_events():
                                                   'то можете написать нам через меню бота или на почту '
                                                   'letitbelab@yandex.ru\n\nОтзывы участников '
                                                   'курса\nhttps://www.youtube.com/channel/UCux9e3yIla2f5WdsOeN45xA/about')
+                            bot.send_invoice(id_, title='Оплата доступа к боту.', description='Оплатить курс',
+                                             provider_token=payment_token, currency='RUB', photo_url=None,
+                                             need_phone_number=False, need_email=False, is_flexible=False,
+                                             prices=[LabeledPrice(label='Доступ к боту', amount=600000)],
+                                             start_parameter='p',
+                                             invoice_payload='paid')
+                            bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
+                                             provider_token=payment_token, currency='RUB', photo_url=None,
+                                             need_phone_number=False, need_email=False, is_flexible=False,
+                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=100000)],
+                                             start_parameter='p',
+                                             invoice_payload='paid')
 
             for user in users:
                 timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
