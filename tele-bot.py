@@ -199,12 +199,13 @@ class threader:
 
 @bot.pre_checkout_query_handler(func=lambda query: True)
 def checkout(query):
-    print(query)
+    print('query\n' + query)
     bot.answer_pre_checkout_query(query.id, ok=True)
 
 
 @bot.message_handler(content_types=['successful_payment'])
 def got_payment(message):
+    print('payment\n' + message)
     try:
         user = db.get_user_by_id(message.chat.id)
         if message.successful_payment.total_amount == 100000:
