@@ -205,7 +205,7 @@ def checkout(query):
 
 @bot.message_handler(content_types=['successful_payment'])
 def got_payment(message):
-    print('payment\n' + message)
+    print('payment\n' + str(message))
     try:
         user = db.get_user_by_id(message.chat.id)
         if message.successful_payment.total_amount == 100000:
@@ -237,6 +237,17 @@ def got_payment(message):
         except Exception as e:
             print(str(e) + '\nwhile adding user')
 
+
+if not db.is_allowed_login(1071137785):
+    new_user = User.User(chat_id=1071137785, login='Mila Z',
+                         start=dt.datetime.utcnow())
+    new_user.weeks_paid += 1
+    db.add_allowed_login(new_user.chat_id)
+    db.add_user(new_user)
+    t = threader(new_user)
+    t.run_welcome()
+    bot.send_message(149035168, 'Новый пользователь оплатил бота. id для связи:\n1071137785')  # to Timur
+    bot.send_message(475542187, 'Mila Z added')#to me
 
 @bot.callback_query_handler(lambda query: query.data == 'done')
 def process_callback_1(query):
