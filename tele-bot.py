@@ -199,7 +199,7 @@ class threader:
 
 @bot.pre_checkout_query_handler(func=lambda query: True)
 def checkout(query):
-    print('query\n' + query)
+    print('query\n' + str(query))
     bot.answer_pre_checkout_query(query.id, ok=True)
 
 
@@ -998,5 +998,5 @@ def polling():  # Don't let the main Thread end.
         time.sleep(5)
 
 
-while True:
+for i in range(111):
     polling()
