@@ -239,7 +239,7 @@ def got_payment(message):
 
 
 #if not db.is_allowed_login(1071137785):
-#   new_user = User.User(chat_id=1071137785, login='Mila Z',
+#   new_user = User.User(chat_id=1071137785,login='Mila Z',
 #                       start=dt.datetime.utcnow())
     #new_user.weeks_paid += 1
     #db.add_allowed_login(new_user.chat_id)
