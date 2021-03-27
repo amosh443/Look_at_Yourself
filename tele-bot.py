@@ -27,7 +27,6 @@ DAY_IN_HANDS = 1
 #payment_token = '381764678:TEST:21892'#test
 
 bot = telebot.TeleBot(token_lay)
-os.system('python tele-bot3.py')
 
 
 def commit():
@@ -993,6 +992,10 @@ def backup():
 
 schedule.every(1).hours.do(backup)
 
+def bot3():
+    os.system('python tele-bot3.py')
+
+threading.Thread(target=bot3).start()#start new bot
 
 def sp():
     while True:
