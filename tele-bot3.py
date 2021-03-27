@@ -10,7 +10,7 @@ from functools import wraps
 
 import Chat
 import Links
-import database as db
+import database3 as db
 
 import telebot
 from telebot import types
@@ -26,8 +26,7 @@ LOOK_AT_YOURSELF = 0
 DAY_IN_HANDS = 1
 #payment_token = '381764678:TEST:21892'#test
 
-bot = telebot.TeleBot(token_lay)
-os.system('python tele-bot3.py')
+bot = telebot.TeleBot(token_dih)
 
 
 def commit():
