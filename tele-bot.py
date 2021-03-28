@@ -995,7 +995,7 @@ schedule.every(1).hours.do(backup)
 def bot3():
     os.system('python tele-bot3.py')
 
-threading.Thread(target=bot3).start()#start new bot
+#threading.Thread(target=bot3).start()#start new bot
 
 def sp():
     while True:
