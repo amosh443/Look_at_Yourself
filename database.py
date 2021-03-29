@@ -206,9 +206,9 @@ def handle_events():
                 for event in events:
                     event_time = event.datetime
                     # print(now.hour, event_time.hour, now.minute, event_time.minute)
-                    if event.type == 0:
-                        if day == event_time.year and len(timing) > event.number and \
-                                timing[event.number][2] == now.hour and now.minute == timing[event.number][3]:
+                    if event.type == 0 and user.events_picked[event.number] == '1':
+                        if len(timing) > event.number and timing[event.number][2] == now.hour and now.minute == timing[event.number][3]\
+                                and (day == event_time.year or (day == event_time.year + 1 and now.hour < timing[0][2])):
                             send(user, event)
                             # print('sent ok')
 
@@ -346,7 +346,7 @@ def add_user(user):
     con = sql.connect('db.db')
     cur = con.cursor()
     try:
-        cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start, weeks_paid) VALUES(?, ?, ?, ?, ?, ?)",
+        cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start, weeks_paid, events_picked) VALUES(?, ?, ?, ?, ?, ?, ?)",
                     user.list())
         cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
                     [str(user.chat_id), user.done])
@@ -374,8 +374,8 @@ def update_user(user):
     cur = con.cursor()
     args = user.list()
     args.append(str(user.chat_id))
-    cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ?, weeks_paid = ? WHERE '
-                'chat_id = ?', args)
+    cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ?, weeks_paid = ?, '
+                'events_picked = ? WHERE chat_id = ?', args)
     cur.execute('UPDATE reports SET done = ? WHERE login = ?',
                 [user.done, str(user.chat_id)])
     commit(con)

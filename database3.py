@@ -59,6 +59,37 @@ def msg(user, message):
         markup.add(InlineKeyboardButton('📝Отправить самоотчет', callback_data='done'))
     bot.send_message(user.chat_id, message, reply_markup=markup)
 
+    if 'хочу попросить вас оставить отзыв' in message:
+        def msg(message, markup=None):
+            bot.send_message(user.chat_id, message, reply_markup=markup)
+            print('sent {0} to {1}'.format(message, user.login))
+
+        def doc(path):
+            for i in range(5):
+                try:
+                    document = open(path, 'rb')
+                    if document is not None:
+                        bot.send_document(user.chat_id, document)
+                    return
+                except Exception as e:
+                    print(e)
+                    time.sleep(5)
+
+        def end():
+            time.sleep(10)
+            msg('Вы можете и дальше практиковать эти медитации, нажав кнопку «Начать '
+                                           'заново» в меню. Там же можно поменять время медитаций или «выключить» '
+                                           'одну из них. Программа запустится опять на 3 дня. Таким образом вы можете '
+                                           'выстроить свою практику на то количество дней, на которое захотите 🙂')
+            time.sleep(5)
+            doc('Польза ментальных упражнений.pdf')
+            time.sleep(5)
+            msg('Ознакомиться с полноценным обучающим курсом медитаций осознанности и самопознания можно здесь:\nhttps://lookatyourself.turbo.site/')
+            doc('О курсе.pdf')
+
+        threading.Thread(target=end).start()
+
+
 
 def doc(user, documents):
     for d in documents.split():
@@ -97,6 +128,7 @@ def send(user, event):
                     for i, answer in enumerate(poll.answers.split(sep='\n')):
                         markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
                 bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
+
     # print('send successful')
     # return
 
@@ -121,61 +153,7 @@ def handle_events():
         while True:
             now_server = dt.datetime.utcnow()
 
-            if now_server.hour == 16 and now_server.minute == 45:#19:45 msk
-                for ap in awaiting_payment:#ap = [['id 0/1', date]
-                    diff = now_server - ap[1]
-                    if diff.days == 7:
-                        delete_awaiting_payment(ap)
-                        ap = ap[0].split()
-                        id_ = int(ap[0])
-                        print('sent reminder to ' + str(id_))
 
-                        def remind():
-                            bot.send_message(id_,
-                                             'Здравствуйте!\nВы интересовались курсом осознанности, но не решились его приобрести. Вас '
-                                             'что-то смутило? Подробная информация о курсе: https://lookatyourself.turbo.site/\n Если у '
-                                             'вас остались вопросы, то можете написать нам через меню бота или на почту '
-                                             'letitbelab@yandex.ru\n\nВы можете посмотреть отзывы участников '
-                                             'курса\nhttps://www.youtube.com/channel/UCux9e3yIla2f5WdsOeN45xA/about\n\nЦена курса всё '
-                                             'ещё 6000, вместо 8000. ')
-                            bot.send_invoice(id_, title='Оплата доступа к боту.', description='Оплатить курс',
-                                             provider_token=payment_token, currency='RUB', photo_url=None,
-                                             need_phone_number=False, need_email=False, is_flexible=False,
-                                             prices=[LabeledPrice(label='Доступ к боту', amount=600000)],
-                                             start_parameter='p',
-                                             invoice_payload='paid')
-                            bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
-                                             provider_token=payment_token, currency='RUB', photo_url=None,
-                                             need_phone_number=False, need_email=False, is_flexible=False,
-                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=100000)],
-                                             start_parameter='p',
-                                             invoice_payload='paid')
-                            time.sleep(3600)
-                            markup = InlineKeyboardMarkup(True)
-                            markup.add(InlineKeyboardButton('Да', callback_data='remind'))
-                            markup.add(InlineKeyboardButton('Нет', callback_data='nope'))
-                            bot.send_message(id_, 'Напомнить вам о приобретении курса ещё через неделю?', reply_markup=markup)
-                        if(ap[1] == '0'):
-                            threading.Thread(target=remind).start()
-                        else:
-                            bot.send_message(id_, 'Здравствуйте! Вы просили напомнить о возможности начать курс. '
-                                                  'Время пришло.\n\nПодробная информация о курсе: '
-                                                  'https://lookatyourself.turbo.site/\nЕсли у вас созрел вопрос, '
-                                                  'то можете написать нам через меню бота или на почту '
-                                                  'letitbelab@yandex.ru\n\nОтзывы участников '
-                                                  'курса\nhttps://www.youtube.com/channel/UCux9e3yIla2f5WdsOeN45xA/about')
-                            bot.send_invoice(id_, title='Оплата доступа к боту.', description='Оплатить курс',
-                                             provider_token=payment_token, currency='RUB', photo_url=None,
-                                             need_phone_number=False, need_email=False, is_flexible=False,
-                                             prices=[LabeledPrice(label='Доступ к боту', amount=600000)],
-                                             start_parameter='p',
-                                             invoice_payload='paid')
-                            bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
-                                             provider_token=payment_token, currency='RUB', photo_url=None,
-                                             need_phone_number=False, need_email=False, is_flexible=False,
-                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=100000)],
-                                             start_parameter='p',
-                                             invoice_payload='paid')
 
             for user in users:
                 timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
@@ -205,9 +183,9 @@ def handle_events():
                 for event in events:
                     event_time = event.datetime
                     # print(now.hour, event_time.hour, now.minute, event_time.minute)
-                    if event.type == 0:
-                        if day == event_time.year and len(timing) > event.number and \
-                                timing[event.number][2] == now.hour and now.minute == timing[event.number][3]:
+                    if event.type == 0 and user.events_picked[event.number] == '1':
+                        if len(timing) > event.number and timing[event.number][2] == now.hour and now.minute == timing[event.number][3]\
+                                and (day == event_time.year or (day == event_time.year + 1 and now.hour < timing[0][2])):
                             send(user, event)
                             # print('sent ok')
 
@@ -345,7 +323,7 @@ def add_user(user):
     con = sql.connect('dd.db')
     cur = con.cursor()
     try:
-        cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start, weeks_paid) VALUES(?, ?, ?, ?, ?, ?)",
+        cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start, weeks_paid, events_picked) VALUES(?, ?, ?, ?, ?, ?, ?)",
                     user.list())
         cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
                     [str(user.chat_id), user.done])
@@ -373,8 +351,8 @@ def update_user(user):
     cur = con.cursor()
     args = user.list()
     args.append(str(user.chat_id))
-    cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ?, weeks_paid = ? WHERE '
-                'chat_id = ?', args)
+    cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ?, weeks_paid = ?, '
+                'events_picked = ? WHERE chat_id = ?', args)
     cur.execute('UPDATE reports SET done = ? WHERE login = ?',
                 [user.done, str(user.chat_id)])
     commit(con)
@@ -655,5 +633,3 @@ def all_awaiting_payment():
     awaiting_payment.clear()
     for row in rows:
         awaiting_payment.append([row[0], dt.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')])
-
-init()

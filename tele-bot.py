@@ -267,6 +267,30 @@ def process_callback_1(query):
         print(e)
 
 
+@bot.callback_query_handler(lambda query: 'pick event' in query.data)
+def process_callback_1(query):
+    print(str(query))
+    # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
+    try:
+        user = db.get_user_by_id(query.message.chat.id)
+        inline = types.InlineKeyboardMarkup(True)
+        events_picked = list(user.events_picked)
+        num = int(query.data.split()[2])
+        for i in range(3):
+            if(i == num):
+                print(int(events_picked[i]))
+                events_picked[i] = str((int(events_picked[i]) + 1) % 2)
+            inline.add(InlineKeyboardButton(str(i + 1) + ('-е сообщение ✅' if events_picked[i] == '1' else '-е сообщение ❌'),
+                                            callback_data='pick event ' + str(i)))
+        bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id,
+                                      reply_markup=inline)
+        user.events_picked = ''.join(events_picked)
+        db.update_user(user)
+
+    except Exception as e:
+        print(e)
+
+
 @bot.callback_query_handler(lambda query: query.data[:4] == 'link')
 def process_callback_1(query):
     # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id) #removes markup
@@ -327,9 +351,6 @@ def start_message(message):
         bot.send_message(id_, message, reply_markup=markup)
         print('sent {0} to {1}'.format(message, name))
 
-    # inline_btn_1 = InlineKeyboardButton('Первая Кнопки!', callback_data='sdss')
-    # inline_kb1 = InlineKeyboardMarkup(True).add(inline_btn_1)
-    # msg("Первая инлайн Кнопки", inline_kb1)
 
     # def remove_markup():
     #    t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardHide())
@@ -848,13 +869,14 @@ def send_text(message):
                 print(str(e))
                 msg("Неверный формат. Введите число от 0 до 23. Например, если сейчас 12:10, напишите 12 в чат.\n"
                     "Если хотите отменить регистрацию, введите /start")
+                return
         # 2 этап - установка времени напоминаний
         elif user.stage in [1, 4]:
             times = []
             strings = text.replace(':', ' ').replace('.', ' ').replace(',', ' ').split()
             if len(strings) != 6:
                 msg('Неверный формат. Введите время в формате чч мм 3 раза одним сообщением.\n'
-                    'Например: 7 00\n19 00\n22 00\nЕсли хотите отменить настройку времени, введите /start')
+                    'Например: 7 00\n13 00\n00 00\nЕсли хотите отменить настройку времени, введите /start')
                 return
 
             for i, value in enumerate(strings):
@@ -945,6 +967,13 @@ def send_text(message):
                 'Часовой пояс GMT+{0}\n'
                 'Ежедневные напоминания приходят в\n{1}'
                 'Хотите что-то изменить? Для выхода в главное меню введите /start'.format(user.time_diff, resp), markup)
+            inline = types.InlineKeyboardMarkup(True)
+            events_picked = user.events_picked
+            for i in range(3):
+                inline.add(InlineKeyboardButton(str(i + 1) + ('-е сообщение ✅' if events_picked[i] == '1' else '-е сообщение ❌'), callback_data='pick event ' + str(i)))
+            msg('Используя кнопки, вы можете «отключить» одно или несколько сообщений, отправляемых в выбранное Вами '
+                'время.', inline)
+            return
 
         if text == 'Изменить часовой пояс':
             user.stage = 3
@@ -995,7 +1024,7 @@ schedule.every(1).hours.do(backup)
 def bot3():
     os.system('python tele-bot3.py')
 
-#threading.Thread(target=bot3).start()#start new bot
+threading.Thread(target=bot3).start()#start new bot
 
 def sp():
     while True:
