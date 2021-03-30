@@ -317,7 +317,7 @@ def send_text(message):
     name = message.chat.first_name
     login = message.chat.username
     if text == 'db' and id_ == 475542187:
-        bot.send_document(475542187, open('db.db', 'rb'))
+        bot.send_document(475542187, open('dd.db', 'rb'))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
     if message.document is not None:
@@ -913,7 +913,7 @@ def send_text(message):
 def backup():
     for i in range(6):
         try:
-            bot.send_document(475542187, open('db.db', 'rb'))
+            bot.send_document(475542187, open('dd.db', 'rb'))
             break
         except Exception as e:
             print(e)
@@ -937,7 +937,7 @@ def polling():  # Don't let the main Thread end.
         bot.polling()
     except Exception as e:
         print(e)
-        bot.send_document(475542187, open('db.db', 'rb'), caption=str(e))
+        bot.send_document(475542187, open('dd.db', 'rb'), caption=str(e))
         time.sleep(5)
 
 
