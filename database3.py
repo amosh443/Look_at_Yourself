@@ -157,7 +157,7 @@ def handle_events():
 
             for user in users:
                 timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
-                now = now_server.replace(hour=(now_server.hour + user.time_diff) % 24, day = now_server.day + (1 if now_server.hour + user.time_diff > 23 else 0))
+                now = now_server + dt.timedelta(hours=user.time_diff)
                 day = (now - user.start).days
 
 
