@@ -752,14 +752,16 @@ def send_text(message):
                 hours = int(text)
                 if 0 <= hours < 24:
                     user.time_diff = int(time_diff(hours, timing.gmtime().tm_hour))
-                    user.next_stage()
-                    db.update_user(user)
                     msg('Ваш часовой пояс GMT+{0} успешно установлен. Вы можете изменить его в настройках.'.format(
                         str(user.time_diff)))
                     if user.stage == 3:
                         user.stage = 2
                         db.update_user(user)
                         return
+                    user.next_stage()
+                    now = dt.datetime.utcnow() + dt.timedelta(hours = user.time_diff)
+                    user.start = now.replace(hour=0, minute=0, microsecond=0)
+                    db.update_user(user)
                     msg('Теперь укажите, в какое время вы хотите получать ежедневные напоминания о выполнении трёх '
                         'основных упражнений.\nВведите время в формате чч мм 3 раза одним сообщением.\nНапример: 7 00\n13 '
                         '00\n00 00')
@@ -784,12 +786,12 @@ def send_text(message):
                     value = int(value)
                 except Exception as e:
                     print(e)
-                    msg('Неверный формат. Введите время в формате чч мм 3 раза.\n'
-                        'Если хотите отменить регистрацию, введите /start')
+                    msg('Неверный формат. Введите время в формате чч мм 3 раза одним сообщением.\n'
+                        'Например: 7 00\n13 00\n00 00\nЕсли хотите отменить настройку времени, введите /start')
                     return
                 if not ((i % 2 == 0 and 0 <= value < 25) or (i % 2 == 1 and 0 <= value < 61)):
-                    msg('Неверный формат. Введите время в формате чч мм 3 раза.\n'
-                        'Если хотите отменить регистрацию, введите /start')
+                    msg('Неверный формат. Введите время в формате чч мм 3 раза одним сообщением.\n'
+                        'Например: 7 00\n13 00\n00 00\nЕсли хотите отменить настройку времени, введите /start')
                     return
                 if i % 2 > 0:
                     times[i // 2].append(value)
@@ -849,7 +851,7 @@ def send_text(message):
             return
         elif user.stage == 7 and text == 'Да':
             db.delete_user(user)
-            new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
+            new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff))
             db.add_user(new_user)
             t = threader(new_user)
             t.run_welcome()
@@ -884,8 +886,8 @@ def send_text(message):
 
         if text == 'Изменить время ежедневных напоминаний':
             user.stage = 4
-            msg('Укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\n'
-                'Введите время в формате чч мм 3 раза одним сообщением.')
+            msg('Укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\nВведите '
+                'время в формате чч мм 3 раза одним сообщением.\nНапример: 7 00\n13 00\n00 00')
             db.update_user(user)
             return
 
@@ -930,8 +932,7 @@ def sp():
 
 
 threading.Thread(target=sp).start()
-
-
+#db.delete_user(db.get_user_by_login('almosh822'))
 def polling():  # Don't let the main Thread end.
     try:
         bot.polling()

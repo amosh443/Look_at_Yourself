@@ -852,14 +852,16 @@ def send_text(message):
                 hours = int(text)
                 if 0 <= hours < 24:
                     user.time_diff = int(time_diff(hours, timing.gmtime().tm_hour))
-                    user.next_stage()
-                    db.update_user(user)
                     msg('Ваш часовой пояс GMT+{0} успешно установлен. Вы можете изменить его в настройках.'.format(
                         str(user.time_diff)))
                     if user.stage == 3:
                         user.stage = 2
                         db.update_user(user)
                         return
+                    user.next_stage()
+                    now = dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff)
+                    user.start = now.replace(hour=0, minute=0, microsecond=0)
+                    db.update_user(user)
                     msg('Теперь укажите, в какое время вы хотите получать ежедневные напоминания о выполнении трёх '
                         'основных упражнений.\nВведите время в формате чч мм 3 раза одним сообщением.\nНапример: 7 00\n13 '
                         '00\n00 00')
@@ -983,8 +985,8 @@ def send_text(message):
 
         if text == 'Изменить время ежедневных напоминаний':
             user.stage = 4
-            msg('Укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\n'
-                'Введите время в формате чч мм 3 раза одним сообщением.')
+            msg('Укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\nВведите '
+                'время в формате чч мм 3 раза одним сообщением.\nНапример: 7 00\n13 00\n00 00')
             db.update_user(user)
             return
 
@@ -1024,7 +1026,7 @@ schedule.every(1).hours.do(backup)
 def bot3():
     os.system('python tele-bot3.py')
 
-# TODO threading.Thread(target=bot3).start()#start new bot
+threading.Thread(target=bot3).start()#start new bot
 
 def sp():
     while True:
