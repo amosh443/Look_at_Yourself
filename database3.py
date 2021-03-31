@@ -26,20 +26,20 @@ bot = telebot.TeleBot(token_dih)
 # os.system('git init')
 # os.system('git config --global user.email mr.almosh443@mail.ru')
 # os.system('git config --global user.name almosh443')
-# print('git inited')
+# print('bot3 git inited')
 
 def commit(cur):
     cur.commit()
     bot.send_document(475542187, open('dd.db', 'rb'), caption='db changed')
     # os.system('git add 3 days db.db')
-    # print('git add')
+    # print('bot3 git add')
     # os.system('git commit -am "auto-commit"')
-    # print('git commit')
+    # print('bot3 git commit')
 
 
 def msg(user, message):
     markup = InlineKeyboardMarkup(True)
-    print('sending {0} to {1} at {2}'.format(message, user.login, dt.datetime.now()))
+    print('bot3 sending {0} to {1} at {2}'.format(message, user.login, dt.datetime.now()))
     tmp = 0
     for link in links:
 
@@ -62,7 +62,7 @@ def msg(user, message):
     if 'хочу попросить вас оставить отзыв' in message:
         def msg(message, markup=None):
             bot.send_message(user.chat_id, message, reply_markup=markup)
-            print('sent {0} to {1}'.format(message, user.login))
+            print('bot3 sent {0} to {1}'.format(message, user.login))
 
         def doc(path):
             for i in range(5):
@@ -72,7 +72,7 @@ def msg(user, message):
                         bot.send_document(user.chat_id, document)
                     return
                 except Exception as e:
-                    print(e)
+                    print('bot3' + str(e))
                     time.sleep(5)
 
         def end():
@@ -129,7 +129,7 @@ def send(user, event):
                         markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
                 bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
 
-    # print('send successful')
+    # print('bot3 send successful')
     # return
 
 
@@ -187,7 +187,7 @@ def handle_events():
                         if len(timing) > event.number and timing[event.number][2] == now.hour and now.minute == timing[event.number][3]\
                                 and (day == event_time.year or (day == event_time.year + 1 and now.hour < timing[0][2])):
                             send(user, event)
-                            # print('sent ok')
+                            # print('bot3 sent ok')
 
                     elif event.type == 1:
                         if day == event_time.year and now.hour == event_time.hour \
@@ -205,7 +205,7 @@ def handle_events():
         try:
             work()
         except Exception as e:
-            print(e)
+            print('bot3 ' + str(e))
             time.sleep(60)
             repeat_work()
 
@@ -328,7 +328,7 @@ def add_user(user):
         cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
                     [str(user.chat_id), user.done])
     except Exception as e:
-        print(e)
+        print('bot3 ' + str(e))
     commit(con)
     users.append(user)
     update_user_timing(user)
@@ -342,7 +342,7 @@ def delete_user(user):
         cur.execute("DELETE FROM reports WHERE login = ?",
                     [str(user.chat_id)])
     except Exception as e:
-        print(e)
+        print('bot3 ' + str(e))
     commit(con)
 
 
@@ -380,7 +380,7 @@ def add_link(link):
         commit(con)
         links.append(link)
     except Exception as e:
-        print('adding link({0}, {1}) failed due to {2}'.format(link.name, link.text, e))
+        print('bot3 adding link({0}, {1}) failed due to {2}'.format(link.name, link.text, e))
 
 
 def update_link(link):
@@ -415,7 +415,7 @@ def get_link_by_name(name):
     try:
         return Links.from_list(rows[0])
     except Exception as e:
-        print('selecting link {0} failed due to {1}'.format(name, e))
+        print('bot3 selecting link {0} failed due to {1}'.format(name, e))
 
 
 def delete_link(name):
@@ -616,7 +616,7 @@ def add_awaiting_payment(id_, type):#type = ' 0/1'
         commit(con)
         awaiting_payment.append([id_, now])
     except Exception as e:
-        print(e + '\nin add_awaiting_payment')
+        print(str(e) + '\nin add_awaiting_payment bot3')
 
 def delete_awaiting_payment(ap):
     con = sql.connect('dd.db')

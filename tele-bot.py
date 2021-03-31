@@ -873,7 +873,7 @@ def send_text(message):
         # 2 этап - установка времени напоминаний
         elif user.stage in [1, 4]:
             times = []
-            strings = text.replace(':', ' ').replace('.', ' ').replace(',', ' ').split()
+            strings = text.replace(':', ' ').replace('.', ' ').replace(',', ' ').replace('-', ' ').split()
             if len(strings) != 6:
                 msg('Неверный формат. Введите время в формате чч мм 3 раза одним сообщением.\n'
                     'Например: 7 00\n13 00\n00 00\nЕсли хотите отменить настройку времени, введите /start')
@@ -1024,7 +1024,7 @@ schedule.every(1).hours.do(backup)
 def bot3():
     os.system('python tele-bot3.py')
 
-threading.Thread(target=bot3).start()#start new bot
+# TODO threading.Thread(target=bot3).start()#start new bot
 
 def sp():
     while True:
