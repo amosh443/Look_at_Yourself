@@ -951,7 +951,7 @@ def send_text(message):
             return
         elif user.stage == 7 and text == 'Да':
             db.delete_user(user)
-            new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
+            new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow(), weeks_paid = user.weeks_paid)
             db.add_user(new_user)
             t = threader(new_user)
             t.run_welcome()
