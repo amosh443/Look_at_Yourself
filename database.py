@@ -184,7 +184,7 @@ def handle_events():
                 day = (now - user.start).days
 
 
-                if (day - 1) // 7 >= user.weeks_paid:
+                if (day - 1) // 7 >= user.weeks_paid and (day - 1) // 7 < 7:
                     if day % 7 == 1 and (day - 1) // 7 == user.weeks_paid and timing[0][2] == now.hour and now.minute == timing[0][3]:
                         msg(user,
                             'Оплаченная часть курса подошла к концу, чтобы продолжить и получить доступ к следующей '

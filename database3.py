@@ -160,26 +160,6 @@ def handle_events():
                 now = now_server + dt.timedelta(hours=user.time_diff)
                 day = (now - user.start).days
 
-
-                if (day - 1) // 7 >= user.weeks_paid:
-                    if day % 7 == 1 and (day - 1) // 7 == user.weeks_paid and timing[0][2] == now.hour and now.minute == timing[0][3]:
-                        msg(user,
-                            'Оплаченная часть курса подошла к концу, чтобы продолжить и получить доступ к следующей '
-                            'неделе — пожалуйста, произведите оплату')
-                        bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
-                                         provider_token=payment_token, currency='RUB', photo_url=None,
-                                         need_phone_number=False, need_email=False, is_flexible=False,
-                                         prices=[LabeledPrice(label='Полный доступ к боту', amount=100000 * (6 - user.weeks_paid))],
-                                         start_parameter='p',
-                                         invoice_payload='paid')
-                        bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
-                                         provider_token=payment_token, currency='RUB', photo_url=None,
-                                         need_phone_number=False, need_email=False, is_flexible=False,
-                                         prices=[LabeledPrice(label='Доступ к следующей неделе курса', amount=100000)],
-                                         start_parameter='p',
-                                         invoice_payload='paid')
-                    continue
-
                 for event in events:
                     event_time = event.datetime
                     # print(now.hour, event_time.hour, now.minute, event_time.minute)
