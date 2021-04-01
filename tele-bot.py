@@ -925,8 +925,9 @@ def send_text(message):
             bot.send_message(149035168, 'Получено новое сообщение от пользователя.')
             bot.send_message(475542187, name + ' в ' + str(new_message.datetime) +
                              ' написал\n' + text)
-            msg('Сообщение отправлено. Ожидайте ответа. Вы можете написать еще одно, либо выйти в главное меню, '
-                'нажав /start')
+            msg('Сообщение отправлено. Ожидайте ответа. Спасибо за Ваше обращение!')
+            user.stage = 2
+            db.update_user(user)
             return
 
         # report
@@ -1026,7 +1027,7 @@ schedule.every(1).hours.do(backup)
 def bot3():
     os.system('python tele-bot3.py')
 
-#TODO threading.Thread(target=bot3).start()#start new bot
+threading.Thread(target=bot3).start()#start new bot
 
 def sp():
     while True:
