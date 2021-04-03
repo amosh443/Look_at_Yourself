@@ -133,22 +133,23 @@ def handle_events():
 
                         def remind():
                             bot.send_message(id_,
-                                             'Здравствуйте!\nВы интересовались курсом осознанности, но не решились его приобрести. Вас '
-                                             'что-то смутило? Подробная информация о курсе: https://lookatyourself.turbo.site/\n Если у '
-                                             'вас остались вопросы, то можете написать нам через меню бота или на почту '
+                                             'Здравствуйте!\nВы интересовались курсом осознанности, но не решились '
+                                             'его приобрести. Вас что-то смутило? Подробная информация о курсе: '
+                                             'https://lookatyourself.turbo.site/\n Если у вас остались вопросы, '
+                                             'то можете написать нам через меню бота или на почту '
                                              'letitbelab@yandex.ru\n\nВы можете посмотреть отзывы участников '
-                                             'курса\nhttps://www.youtube.com/channel/UCux9e3yIla2f5WdsOeN45xA/about\n\nЦена курса всё '
-                                             'ещё 6000, вместо 8000. ')
+                                             'курса\nhttps://www.youtube.com/playlist?list=PLh-HZjB6weoLx-aqZ_dAdcuvrGRF-deGr'
+                                             '-aqZ_dAdcuvrGRF-deGr\n\nЦена курса всё ещё 3000, вместо 6000.')
                             bot.send_invoice(id_, title='Оплата доступа к боту.', description='Оплатить курс',
                                              provider_token=payment_token, currency='RUB', photo_url=None,
                                              need_phone_number=False, need_email=False, is_flexible=False,
-                                             prices=[LabeledPrice(label='Доступ к боту', amount=600000)],
+                                             prices=[LabeledPrice(label='Доступ к боту', amount=300000)],
                                              start_parameter='p',
                                              invoice_payload='paid')
                             bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
                                              provider_token=payment_token, currency='RUB', photo_url=None,
                                              need_phone_number=False, need_email=False, is_flexible=False,
-                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=100000)],
+                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=50000)],
                                              start_parameter='p',
                                              invoice_payload='paid')
                             time.sleep(3600)
@@ -168,13 +169,13 @@ def handle_events():
                             bot.send_invoice(id_, title='Оплата доступа к боту.', description='Оплатить курс',
                                              provider_token=payment_token, currency='RUB', photo_url=None,
                                              need_phone_number=False, need_email=False, is_flexible=False,
-                                             prices=[LabeledPrice(label='Доступ к боту', amount=600000)],
+                                             prices=[LabeledPrice(label='Доступ к боту', amount=300000)],
                                              start_parameter='p',
                                              invoice_payload='paid')
                             bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
                                              provider_token=payment_token, currency='RUB', photo_url=None,
                                              need_phone_number=False, need_email=False, is_flexible=False,
-                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=100000)],
+                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=50000)],
                                              start_parameter='p',
                                              invoice_payload='paid')
 
@@ -192,13 +193,13 @@ def handle_events():
                         bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
                                          provider_token=payment_token, currency='RUB', photo_url=None,
                                          need_phone_number=False, need_email=False, is_flexible=False,
-                                         prices=[LabeledPrice(label='Полный доступ к боту', amount=100000 * (6 - user.weeks_paid))],
+                                         prices=[LabeledPrice(label='Полный доступ к боту', amount=50000 * (6 - user.weeks_paid))],
                                          start_parameter='p',
                                          invoice_payload='paid')
                         bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
                                          provider_token=payment_token, currency='RUB', photo_url=None,
                                          need_phone_number=False, need_email=False, is_flexible=False,
-                                         prices=[LabeledPrice(label='Доступ к следующей неделе курса', amount=100000)],
+                                         prices=[LabeledPrice(label='Доступ к следующей неделе курса', amount=50000)],
                                          start_parameter='p',
                                          invoice_payload='paid')
                     continue

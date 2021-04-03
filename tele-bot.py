@@ -185,17 +185,17 @@ class threader:
         doc('Публичная оферта.pdf')
         msg('Если вам нужно время, чтобы обдумать или подготовиться, то вы можете оставить бота в чатах Telegram, '
             'чтобы не потерять, а оплатить и начать обучение позднее.\nНачав, вы будете ежедневно получать материалы '
-            'и упражнения. Вы можете оплатить весь курс целиком за 6000 рублей или оплачивать понедельно, с отрезками '
-            'в одну неделю программы курса, за 1000 рублей за неделю.')
+            'и упражнения. Вы можете оплатить весь курс целиком за 3000 рублей или оплачивать понедельно, с отрезками '
+            'в одну неделю программы курса, за 500 рублей за неделю.')
         bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
                          provider_token=payment_token, currency='RUB', photo_url=None,
                          need_phone_number=False, need_email=False, is_flexible=False,
-                         prices=[LabeledPrice(label='Полный доступ к боту', amount=600000)], start_parameter='p',
+                         prices=[LabeledPrice(label='Полный доступ к боту', amount=300000)], start_parameter='p',
                          invoice_payload='paid')
         bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
                          provider_token=payment_token, currency='RUB', photo_url=None,
                          need_phone_number=False, need_email=False, is_flexible=False,
-                         prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=100000)], start_parameter='p',
+                         prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=50000)], start_parameter='p',
                          invoice_payload='paid')
 
 
@@ -210,27 +210,27 @@ def got_payment(message):
     print('payment\n' + str(message))
     try:
         user = db.get_user_by_id(message.chat.id)
-        if message.successful_payment.total_amount == 100000:
+        if message.successful_payment.total_amount == 50000:
             user.weeks_paid += 1
         else:
             user.weeks_paid = 999
         bot.send_message(149035168, 'Пользователь оплатил бота' + (
-            ' на неделю' if message.successful_payment.total_amount == 1000 else '') + '. id для связи:\n' + str(user.chat_id))  # to Timur
+            ' на неделю' if message.successful_payment.total_amount == 50000 else '') + '. id для связи:\n' + str(user.chat_id))  # to Timur
         bot.send_message(475542187, 'Пользователь оплатил бота' + (
-            ' на неделю' if message.successful_payment.total_amount == 1000 else '') + '. id для связи:\n' + str(user.chat_id))  # to almosh
+            ' на неделю' if message.successful_payment.total_amount == 50000 else '') + '. id для связи:\n' + str(user.chat_id))  # to almosh
 
         db.update_user(user)
     except Exception:#user does not exist
         try:
             new_user = User.User(chat_id=message.chat.id, login=str(message.chat.username) + ' ' + str(message.chat.first_name), start=dt.datetime.utcnow())
-            if message.successful_payment.total_amount == 100000:
+            if message.successful_payment.total_amount == 50000:
                 new_user.weeks_paid += 1
             else:
                 new_user.weeks_paid = 999
             db.add_allowed_login(new_user.chat_id)
 
-            bot.send_message(149035168, 'Новый пользователь оплатил бота' + (' на неделю' if message.successful_payment.total_amount == 1000 else '') + '. id для связи:\n' + str(new_user.chat_id))#to Timur
-            bot.send_message(475542187, 'Новый пользователь оплатил бота' + (' на неделю' if message.successful_payment.total_amount == 1000 else '') + '. id для связи:\n' + str(new_user.chat_id))#to almosh
+            bot.send_message(149035168, 'Новый пользователь оплатил бота' + (' на неделю' if message.successful_payment.total_amount == 500 else '') + '. id для связи:\n' + str(new_user.chat_id))#to Timur
+            bot.send_message(475542187, 'Новый пользователь оплатил бота' + (' на неделю' if message.successful_payment.total_amount == 500 else '') + '. id для связи:\n' + str(new_user.chat_id))#to almosh
             db.add_user(new_user)
             db.delete_awaiting_payment(new_user.chat_id)
             t = threader(new_user)
