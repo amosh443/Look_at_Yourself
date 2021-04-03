@@ -165,7 +165,7 @@ def handle_events():
                     # print(now.hour, event_time.hour, now.minute, event_time.minute)
                     if event.type == 0 and user.events_picked[event.number] == '1':
                         if len(timing) > event.number and timing[event.number][2] == now.hour and now.minute == timing[event.number][3]\
-                                and (day == event_time.year or (day == event_time.year + 1 and now.hour < timing[0][2])):
+                                and ((day == event_time.year and now.hour >= timing[0][2]) or (day == event_time.year + 1 and now.hour < timing[0][2])):
                             send(user, event)
                             # print('bot3 sent ok')
 
