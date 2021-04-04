@@ -948,9 +948,9 @@ def send_text(message):
                         doc(f)
             return
         elif user.stage == 7 and text == 'Да':
-            user.start = dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff)
+            user.start = (dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff)).replace(hour=0, minute=0, microsecond=0)
             db.update_user(user)
-            msg('Завтра Вы снова начнете получать сообщения с первого дня программы.')
+            msg('Вы снова начнёте получать сообщения с упражнениями.')
             return
 
         if text == 'Настройки':
