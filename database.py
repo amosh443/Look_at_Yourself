@@ -22,12 +22,6 @@ DAY_IN_HANDS = 1
 #payment_token = '381764678:TEST:21892'#test
 
 bot = telebot.TeleBot(token_lay)
-bot3days = telebot.TeleBot(token_dih)
-
-# os.system('git init')
-# os.system('git config --global user.email mr.almosh443@mail.ru')
-# os.system('git config --global user.name almosh443')
-# print('git inited')
 
 def commit(cur):
     cur.commit()

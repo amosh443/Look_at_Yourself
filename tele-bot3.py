@@ -21,10 +21,6 @@ import time as timing
 # token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
 token_lay = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 token_dih = "1716180979:AAHlbkPTJ7FBJvT3GgGUadRQy7G3yTtIt7M"
-payment_token = '390540012:LIVE:14126'
-LOOK_AT_YOURSELF = 0
-DAY_IN_HANDS = 1
-#payment_token = '381764678:TEST:21892'#test
 
 bot = telebot.TeleBot(token_dih)
 
@@ -851,11 +847,9 @@ def send_text(message):
                         doc(f)
             return
         elif user.stage == 7 and text == 'Да':
-            db.delete_user(user)
-            new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff), weeks_paid = user.weeks_paid)
-            db.add_user(new_user)
-            t = threader(new_user)
-            t.run_welcome()
+            user.start = dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff)
+            db.update_user(user)
+            msg('Завтра Вы снова начнете получать сообщения с первого дня программы.')
             return
 
         if text == 'Настройки':

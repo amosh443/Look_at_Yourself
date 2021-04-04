@@ -16,17 +16,9 @@ import Interactive
 # token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
 token_lay = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
 token_dih = "1716180979:AAHlbkPTJ7FBJvT3GgGUadRQy7G3yTtIt7M"
-payment_token = '390540012:LIVE:14126'
-LOOK_AT_YOURSELF = 0
-DAY_IN_HANDS = 1
-#payment_token = '381764678:TEST:21892'#test
 
 bot = telebot.TeleBot(token_dih)
 
-# os.system('git init')
-# os.system('git config --global user.email mr.almosh443@mail.ru')
-# os.system('git config --global user.name almosh443')
-# print('bot3 git inited')
 
 def commit(cur):
     cur.commit()
@@ -78,17 +70,19 @@ def msg(user, message):
         def end():
             time.sleep(10)
             msg('Вы можете и дальше практиковать эти медитации, нажав кнопку «Начать '
-                                           'заново» в меню. Там же можно поменять время медитаций или «выключить» '
-                                           'одну из них. Программа запустится опять на 3 дня. Таким образом вы можете '
-                                           'выстроить свою практику на то количество дней, на которое захотите 🙂')
+                'заново» в меню. Там же можно поменять время медитаций или «выключить» '
+                'одну из них. Программа запустится опять на 3 дня. Таким образом вы можете '
+                'выстроить свою практику на то количество дней, на которое захотите 🙂')
             time.sleep(5)
             doc('Польза ментальных упражнений.pdf')
             time.sleep(5)
-            msg('Ознакомиться с полноценным обучающим курсом медитаций осознанности и самопознания можно здесь:\nhttps://lookatyourself.turbo.site/')
+            msg('Ознакомиться с полноценным обучающим курсом медитаций осознанности и самопознания можно '
+                'здесь:\nhttps://lookatyourself.turbo.site/')
             doc('О курсе.pdf')
 
         threading.Thread(target=end).start()
-
+        user.done = '1'
+        update_user(user)
 
 
 def doc(user, documents):
@@ -153,8 +147,6 @@ def handle_events():
         while True:
             now_server = dt.datetime.utcnow()
 
-
-
             for user in users:
                 timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
                 now = now_server + dt.timedelta(hours=user.time_diff)
@@ -164,12 +156,16 @@ def handle_events():
                     event_time = event.datetime
                     # print(now.hour, event_time.hour, now.minute, event_time.minute)
                     if event.type == 0 and user.events_picked[event.number] == '1':
-                        if len(timing) > event.number and timing[event.number][2] == now.hour and now.minute == timing[event.number][3]\
-                                and ((day == event_time.year and now.hour >= timing[0][2]) or (day == event_time.year + 1 and now.hour < timing[0][2])):
+                        if len(timing) > event.number and timing[event.number][2] == now.hour and now.minute == \
+                                timing[event.number][3] \
+                                and ((day == event_time.year and now.hour >= timing[0][2]) or (
+                                day == event_time.year + 1 and now.hour < timing[0][2])):
                             send(user, event)
                             # print('bot3 sent ok')
 
                     elif event.type == 1:
+                        if day == 4 and user.done == '1':  # end msgs sent before
+                            continue
                         if day == event_time.year and now.hour == event_time.hour \
                                 and now.minute == event_time.minute:
                             send(user, event)
@@ -205,7 +201,7 @@ def del_files():
 
 
 def init():
-    #del_files()
+    # del_files()
     thread = threading.Thread(target=handle_events)
     thread.start()
     # del_files()
@@ -303,8 +299,9 @@ def add_user(user):
     con = sql.connect('dd.db')
     cur = con.cursor()
     try:
-        cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start, weeks_paid, events_picked) VALUES(?, ?, ?, ?, ?, ?, ?)",
-                    user.list())
+        cur.execute(
+            "INSERT INTO users(time_diff, chat_id, login, stage, start, weeks_paid, events_picked) VALUES(?, ?, ?, ?, ?, ?, ?)",
+            user.list())
         cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
                     [str(user.chat_id), user.done])
     except Exception as e:
@@ -582,7 +579,8 @@ def add_poll(poll):
     polls.append(poll)
     map_poll_to_event(poll)
 
-def add_awaiting_payment(id_, type):#type = ' 0/1'
+
+def add_awaiting_payment(id_, type):  # type = ' 0/1'
     try:
         con = sql.connect('dd.db')
         cur = con.cursor()
@@ -598,12 +596,14 @@ def add_awaiting_payment(id_, type):#type = ' 0/1'
     except Exception as e:
         print(str(e) + '\nin add_awaiting_payment bot3')
 
+
 def delete_awaiting_payment(ap):
     con = sql.connect('dd.db')
     cur = con.cursor()
     cur.execute("DELETE FROM awaiting_payment WHERE chat_id = ?", [ap[0]])
     commit(con)
     awaiting_payment.remove(ap)
+
 
 def all_awaiting_payment():
     con = sql.connect('dd.db')
@@ -613,3 +613,10 @@ def all_awaiting_payment():
     awaiting_payment.clear()
     for row in rows:
         awaiting_payment.append([row[0], dt.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')])
+
+def count_relaunch():
+    con = sql.connect('dd.db')
+    cur = con.cursor()
+    cur.execute("SELECT * FROM stats")
+    current = int(cur.fetchall()[0][0])
+    cur.execute("UPDATE stats SET relaunches = ? WHERE relaunches = ?", [current + 1, current])
