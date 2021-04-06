@@ -97,6 +97,7 @@ def send(user, event):
     try:
         msg(user, event.text)
     except Exception as e:
+        print(e)
         if 'blocked' in str(e):
             delete_user(user)
 

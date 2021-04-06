@@ -850,6 +850,7 @@ def send_text(message):
             user.start = (dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff) - dt.timedelta(days=1)).replace(hour=0, minute=0, microsecond=0)
             user.stage = 2
             db.update_user(user)
+            db.count_relaunch()
             msg('Вы снова начнёте получать сообщения с упражнениями.')
             return
 
