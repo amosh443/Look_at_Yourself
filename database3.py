@@ -179,7 +179,8 @@ def handle_events():
                         if now.day == event_time.day and now.hour == event_time.hour \
                                 and now.minute == event_time.minute:
                             send(user, event)
-            time.sleep(60)
+            while dt.datetime.utcnow().minute == now_server.minute:
+                time.sleep(1)
 
     def repeat_work():
         try:
@@ -324,6 +325,10 @@ def delete_user(user):
                     [str(user.chat_id)])
     except Exception as e:
         print('bot3 ' + str(e))
+    try:
+        users.remove(user)
+    except Exception as e:
+        print(e)
     commit(con)
 
 
