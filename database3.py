@@ -125,7 +125,8 @@ def send(user, event):
                             markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
                     bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
 
-    threading.Thread(target=work).start()
+    work()
+    # threading.Thread(target=work).start()
     # print('bot3 send successful')
     # return
 

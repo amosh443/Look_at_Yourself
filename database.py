@@ -96,7 +96,8 @@ def send(user, event):
                     bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup,
                                      parse_mode='Markdown')
 
-    threading.Thread(target=work).start()
+    work()
+    # threading.Thread(target=work).start()
 
     # print('send successful')
     # return
