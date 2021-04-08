@@ -94,36 +94,38 @@ def doc(user, documents):
 
 
 def send(user, event):
-    try:
-        msg(user, event.text)
-    except Exception as e:
-        print(e)
-        if 'blocked' in str(e):
-            delete_user(user)
+    def work():
+        try:
+            msg(user, event.text)
+        except Exception as e:
+            print(e)
+            if 'blocked' in str(e):
+                delete_user(user)
 
-    if event.attachment is not None:
-        doc(user, event.attachment)
+        if event.attachment is not None:
+            doc(user, event.attachment)
 
-    for i, poll in enumerate(polls):
-        nums = [int(s) for s in poll.event.split()]
-        if nums[0] == event.datetime.year:
-            if event.id_ == event_for_poll[poll.id]:
-                markup = None
-                if poll.type == 1:
-                    answers = []
-                    for i, answer in enumerate(poll.answers.split(sep='\n')):
-                        if len(answers) == 0:
-                            answers.append([])
-                        # answers[0].append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
-                        answers[0].append({'text': answer, 'callback_data': 'poll {0} {1}'.format(poll.id, i)})
-                    markup = InlineKeyboardMarkup()
-                    markup.keyboard = answers
-                else:
-                    markup = InlineKeyboardMarkup(True)
-                    for i, answer in enumerate(poll.answers.split(sep='\n')):
-                        markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
-                bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
+        for i, poll in enumerate(polls):
+            nums = [int(s) for s in poll.event.split()]
+            if nums[0] == event.datetime.year:
+                if event.id_ == event_for_poll[poll.id]:
+                    markup = None
+                    if poll.type == 1:
+                        answers = []
+                        for i, answer in enumerate(poll.answers.split(sep='\n')):
+                            if len(answers) == 0:
+                                answers.append([])
+                            # answers[0].append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                            answers[0].append({'text': answer, 'callback_data': 'poll {0} {1}'.format(poll.id, i)})
+                        markup = InlineKeyboardMarkup()
+                        markup.keyboard = answers
+                    else:
+                        markup = InlineKeyboardMarkup(True)
+                        for i, answer in enumerate(poll.answers.split(sep='\n')):
+                            markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                    bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
 
+    threading.Thread(target=work).start()
     # print('bot3 send successful')
     # return
 
