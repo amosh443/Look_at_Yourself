@@ -101,6 +101,7 @@ def send(user, event):
             print(e)
             if 'blocked' in str(e):
                 delete_user(user)
+            return
 
         if event.attachment is not None:
             doc(user, event.attachment)
