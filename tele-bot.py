@@ -1024,6 +1024,7 @@ def bot3():
     os.system('python tele-bot3.py')
 
 threading.Thread(target=bot3).start()#start new bot
+bot.send_message(475542187, 'bot restarted')#to almosh
 
 def sp():
     while True:
