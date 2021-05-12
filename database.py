@@ -1,7 +1,7 @@
 import os
 import sqlite3 as sql
 
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice
 
 import Chat
 import Links
@@ -14,18 +14,18 @@ import time
 import Interactive
 
 # token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
-token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+token_lay = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+token_dih = "1716180979:AAHlbkPTJ7FBJvT3GgGUadRQy7G3yTtIt7M"
+payment_token = '390540012:LIVE:14126'
+LOOK_AT_YOURSELF = 0
+DAY_IN_HANDS = 1
+#payment_token = '381764678:TEST:21892'#test
 
-bot = telebot.TeleBot(token)
-
-
-# os.system('git init')
-# os.system('git config --global user.email mr.almosh443@mail.ru')
-# os.system('git config --global user.name almosh443')
-# print('git inited')
+bot = telebot.TeleBot(token_lay)
 
 def commit(cur):
     cur.commit()
+    bot.send_document(475542187, open('db.db', 'rb'), caption='db changed')
     # os.system('git add db.db')
     # print('git add')
     # os.system('git commit -am "auto-commit"')
@@ -41,10 +41,10 @@ def msg(user, message):
         if link.name in message:
             if link.name == 'Метта' and 'Метта на себя' in message:
                 continue
-            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name if link.name != 'Трехминутную '
+            markup.add(InlineKeyboardButton('Описание упражнения {0}'.format(link.name if link.name != 'Трёхминутную '
                                                                                                        'дыхательную '
                                                                                                        'медитацию'
-                                                                             else 'Трехминутная дыхательная '
+                                                                             else 'Трёхминутная дыхательная '
                                                                                   'медитация'), callback_data='link'
                                                                                                               + str(
                 tmp)))
@@ -64,34 +64,42 @@ def doc(user, documents):
 
 
 def send(user, event):
-    try:
-        msg(user, event.text)
-    except Exception as e:
-        if 'blocked' in str(e):
-            delete_user(user)
+    def work():
+        try:
+            msg(user, event.text)
+        except Exception as e:
+            print(e)
+            if 'blocked' in str(e):
+                delete_user(user)
+            return
 
-    if event.attachment is not None:
-        doc(user, event.attachment)
+        if event.attachment is not None:
+            doc(user, event.attachment)
 
-    for i, poll in enumerate(polls):
-        nums = [int(s) for s in poll.event.split()]
-        if nums[0] == event.datetime.year:
-            if event.id_ == event_for_poll[poll.id]:
-                markup = None
-                if poll.type == 1:
-                    answers = []
-                    for i, answer in enumerate(poll.answers.split(sep='\n')):
-                        if len(answers) == 0:
-                            answers.append([])
-                        # answers[0].append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
-                        answers[0].append({'text': answer, 'callback_data': 'poll {0} {1}'.format(poll.id, i)})
-                    markup = InlineKeyboardMarkup()
-                    markup.keyboard = answers
-                else:
-                    markup = InlineKeyboardMarkup(True)
-                    for i, answer in enumerate(poll.answers.split(sep='\n')):
-                        markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
-                bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
+        for i, poll in enumerate(polls):
+            nums = [int(s) for s in poll.event.split()]
+            if nums[0] == event.datetime.year:
+                if event.id_ == event_for_poll[poll.id]:
+                    markup = None
+                    if poll.type == 1:
+                        answers = []
+                        for i, answer in enumerate(poll.answers.split(sep='\n')):
+                            if len(answers) == 0:
+                                answers.append([])
+                            # answers[0].append(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                            answers[0].append({'text': answer, 'callback_data': 'poll {0} {1}'.format(poll.id, i)})
+                        markup = InlineKeyboardMarkup()
+                        markup.keyboard = answers
+                    else:
+                        markup = InlineKeyboardMarkup(True)
+                        for i, answer in enumerate(poll.answers.split(sep='\n')):
+                            markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+                    bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup,
+                                     parse_mode='Markdown')
+
+    work()
+    # threading.Thread(target=work).start()
+
     # print('send successful')
     # return
 
@@ -101,6 +109,8 @@ events = []
 links = []
 polls = []
 event_for_poll = []
+allowed_logins = []
+awaiting_payment = []
 
 
 def handle_events():
@@ -108,22 +118,100 @@ def handle_events():
     all_events()
     all_links()
     all_polls()
+    all_awaiting_payment()
 
     def work():
         while True:
             now_server = dt.datetime.utcnow()
-            # map polls to events
+
+            if now_server.hour == 16 and now_server.minute == 45:#19:45 msk
+                for ap in awaiting_payment:#ap = [['id 0/1', date]
+                    diff = now_server - ap[1]
+                    if diff.days == 7:
+                        delete_awaiting_payment(ap)
+                        ap = ap[0].split()
+                        id_ = int(ap[0])
+                        print('sent reminder to ' + str(id_))
+
+                        def remind():
+                            bot.send_message(id_,
+                                             'Здравствуйте!\nВы интересовались курсом осознанности, но не решились '
+                                             'его приобрести. Вас что-то смутило? Подробная информация о курсе: '
+                                             'https://lookatyourself.turbo.site/\n Если у вас остались вопросы, '
+                                             'то можете написать нам через меню бота или на почту '
+                                             'letitbelab@yandex.ru\n\nВы можете посмотреть отзывы участников '
+                                             'курса\nhttps://www.youtube.com/playlist?list=PLh-HZjB6weoLx-aqZ_dAdcuvrGRF-deGr'
+                                             '-aqZ_dAdcuvrGRF-deGr\n\nЦена курса всё ещё 3000, вместо 6000.')
+                            bot.send_invoice(id_, title='Оплата доступа к боту.', description='Оплатить курс',
+                                             provider_token=payment_token, currency='RUB', photo_url=None,
+                                             need_phone_number=False, need_email=False, is_flexible=False,
+                                             prices=[LabeledPrice(label='Доступ к боту', amount=300000)],
+                                             start_parameter='p',
+                                             invoice_payload='paid')
+                            bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
+                                             provider_token=payment_token, currency='RUB', photo_url=None,
+                                             need_phone_number=False, need_email=False, is_flexible=False,
+                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=50000)],
+                                             start_parameter='p',
+                                             invoice_payload='paid')
+                            time.sleep(3600)
+                            markup = InlineKeyboardMarkup(True)
+                            markup.add(InlineKeyboardButton('Да', callback_data='remind'))
+                            markup.add(InlineKeyboardButton('Нет', callback_data='nope'))
+                            bot.send_message(id_, 'Напомнить вам о приобретении курса ещё через неделю?', reply_markup=markup)
+                        if(ap[1] == '0'):
+                            threading.Thread(target=remind).start()
+                        else:
+                            bot.send_message(id_, 'Здравствуйте! Вы просили напомнить о возможности начать курс. '
+                                                  'Время пришло.\n\nПодробная информация о курсе: '
+                                                  'https://lookatyourself.turbo.site/\nЕсли у вас созрел вопрос, '
+                                                  'то можете написать нам через меню бота или на почту '
+                                                  'letitbelab@yandex.ru\n\nОтзывы участников '
+                                                  'курса\nhttps://www.youtube.com/channel/UCux9e3yIla2f5WdsOeN45xA/about')
+                            bot.send_invoice(id_, title='Оплата доступа к боту.', description='Оплатить курс',
+                                             provider_token=payment_token, currency='RUB', photo_url=None,
+                                             need_phone_number=False, need_email=False, is_flexible=False,
+                                             prices=[LabeledPrice(label='Доступ к боту', amount=300000)],
+                                             start_parameter='p',
+                                             invoice_payload='paid')
+                            bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
+                                             provider_token=payment_token, currency='RUB', photo_url=None,
+                                             need_phone_number=False, need_email=False, is_flexible=False,
+                                             prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=50000)],
+                                             start_parameter='p',
+                                             invoice_payload='paid')
 
             for user in users:
                 timing = get_user_timing(user)  # timing = [login, number, hours, minutes]
-                now = now_server.replace(hour=(now_server.hour + user.time_diff) % 24)
+                now = now_server + dt.timedelta(hours=user.time_diff)
                 day = (now - user.start).days
+
+
+                if (day - 1) // 7 >= user.weeks_paid and (day - 1) // 7 < 7:
+                    if day % 7 == 1 and (day - 1) // 7 == user.weeks_paid and timing[0][2] == now.hour and now.minute == timing[0][3]:
+                        msg(user,
+                            'Оплаченная часть курса подошла к концу, чтобы продолжить и получить доступ к следующей '
+                            'неделе — пожалуйста, произведите оплату')
+                        bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
+                                         provider_token=payment_token, currency='RUB', photo_url=None,
+                                         need_phone_number=False, need_email=False, is_flexible=False,
+                                         prices=[LabeledPrice(label='Полный доступ к боту', amount=50000 * (6 - user.weeks_paid))],
+                                         start_parameter='p',
+                                         invoice_payload='paid')
+                        bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
+                                         provider_token=payment_token, currency='RUB', photo_url=None,
+                                         need_phone_number=False, need_email=False, is_flexible=False,
+                                         prices=[LabeledPrice(label='Доступ к следующей неделе курса', amount=50000)],
+                                         start_parameter='p',
+                                         invoice_payload='paid')
+                    continue
+
                 for event in events:
                     event_time = event.datetime
                     # print(now.hour, event_time.hour, now.minute, event_time.minute)
-                    if event.type == 0:
-                        if day == event_time.year and len(timing) > event.number and \
-                                timing[event.number][2] == now.hour and now.minute == timing[event.number][3]:
+                    if event.type == 0 and user.events_picked[event.number] == '1':
+                        if len(timing) > event.number and timing[event.number][2] == now.hour and now.minute == timing[event.number][3]\
+                                and ((day == event_time.year and now.hour >= timing[0][2]) or (day == event_time.year + 1 and now.hour < timing[0][2])):
                             send(user, event)
                             # print('sent ok')
 
@@ -137,7 +225,8 @@ def handle_events():
                         if now.day == event_time.day and now.hour == event_time.hour \
                                 and now.minute == event_time.minute:
                             send(user, event)
-            time.sleep(60)
+            while dt.datetime.utcnow().minute == now_server.minute:
+                time.sleep(1)
 
     def repeat_work():
         try:
@@ -156,9 +245,14 @@ def del_files():
         link.attachment = ''
         update_link(link)
         print(link.text)
+    all_events()
+    for event in events:
+        event.attachment = ''
+        update_event(event)
 
 
 def init():
+    #del_files()
     thread = threading.Thread(target=handle_events)
     thread.start()
     # del_files()
@@ -199,6 +293,7 @@ def add_allowed_login(login):
     cur = con.cursor()
     cur.execute('INSERT INTO allowed_logins(login) VALUES(?)', [login])
     commit(con)
+    allowed_logins.append(login)
 
 
 def get_allowed_logins():
@@ -206,8 +301,8 @@ def get_allowed_logins():
     cur = con.cursor()
     cur.execute("SELECT * FROM allowed_logins")
     rows = cur.fetchall()
-    result = [row[0] for row in rows]
-    return result
+    allowed_logins = [str(row[0]) for row in rows]
+    return allowed_logins
 
 
 def is_allowed_login(login):
@@ -255,7 +350,7 @@ def add_user(user):
     con = sql.connect('db.db')
     cur = con.cursor()
     try:
-        cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start) VALUES(?, ?, ?, ?, ?)",
+        cur.execute("INSERT INTO users(time_diff, chat_id, login, stage, start, weeks_paid, events_picked) VALUES(?, ?, ?, ?, ?, ?, ?)",
                     user.list())
         cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
                     [str(user.chat_id), user.done])
@@ -271,8 +366,8 @@ def delete_user(user):
     cur = con.cursor()
     try:
         cur.execute("DELETE FROM users WHERE chat_id = ?", [user.chat_id])
-        cur.execute("INSERT INTO reports(login, done) VALUES(?, ?)",
-                    [str(user.chat_id), user.done])
+        cur.execute("DELETE FROM reports WHERE login = ?",
+                    [str(user.chat_id)])
     except Exception as e:
         print(e)
     commit(con)
@@ -283,8 +378,8 @@ def update_user(user):
     cur = con.cursor()
     args = user.list()
     args.append(str(user.chat_id))
-    cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ? WHERE chat_id = ?',
-                args)
+    cur.execute('UPDATE users SET time_diff = ?, chat_id = ?, login = ?, stage = ?, start = ?, weeks_paid = ?, '
+                'events_picked = ? WHERE chat_id = ?', args)
     cur.execute('UPDATE reports SET done = ? WHERE login = ?',
                 [user.done, str(user.chat_id)])
     commit(con)
@@ -498,7 +593,7 @@ def delete_poll(id_):
     con = sql.connect('db.db')
     cur = con.cursor()
     cur.execute("DELETE FROM polls WHERE id = ?", [id_])
-    con.commit()
+    commit(con)
     for i, e in enumerate(polls):
         if e.id == id_:
             polls.remove(e)
@@ -516,7 +611,7 @@ def update_poll(poll):
     cur = con.cursor()
     cur.execute('UPDATE polls SET event = ?, question = ?, type = ?, answers = ?, responses = ? WHERE id = ?',
                 poll.list())
-    con.commit()
+    commit(con)
 
     for i, e in enumerate(polls):
         if e.id == poll.id:
@@ -530,6 +625,38 @@ def add_poll(poll):
     cur.execute('INSERT INTO polls(event, question, type, answers, responses) VALUES (?, ?, ?, ?, ?)',
                 poll.list_to_add())
     poll.id = cur.lastrowid
-    con.commit()
+    commit(con)
     polls.append(poll)
     map_poll_to_event(poll)
+
+def add_awaiting_payment(id_, type):#type = ' 0/1'
+    try:
+        con = sql.connect('db.db')
+        cur = con.cursor()
+        id_ = str(id_) + type
+        now = dt.datetime.utcnow().replace(hour=0, minute=0, microsecond=0)
+        for ap in awaiting_payment:
+            if ap[0] == id_:
+                return
+        cur.execute('INSERT INTO awaiting_payment(chat_id, date) VALUES (?, ?)',
+                    [id_, now])
+        commit(con)
+        awaiting_payment.append([id_, now])
+    except Exception as e:
+        print(e + '\nin add_awaiting_payment')
+
+def delete_awaiting_payment(ap):
+    con = sql.connect('db.db')
+    cur = con.cursor()
+    cur.execute("DELETE FROM awaiting_payment WHERE chat_id = ?", [ap[0]])
+    commit(con)
+    awaiting_payment.remove(ap)
+
+def all_awaiting_payment():
+    con = sql.connect('db.db')
+    cur = con.cursor()
+    cur.execute("SELECT * FROM awaiting_payment")
+    rows = cur.fetchall()
+    awaiting_payment.clear()
+    for row in rows:
+        awaiting_payment.append([row[0], dt.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')])

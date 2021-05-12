@@ -5,7 +5,7 @@ import os
 import schedule
 import Interactive
 
-from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
 from functools import wraps
 
 import Chat
@@ -19,16 +19,17 @@ import Programme
 import time as timing
 
 # token = "1406324519:AAGIK0HBMNtZ3IfSZ_iiy0PfM6bv8Ngch7c"  # older token
-token = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+token_lay = "1413164033:AAH0U93n1FtD9H1y6cdMOGNojfzigzsxu2M"
+token_dih = "1716180979:AAHlbkPTJ7FBJvT3GgGUadRQy7G3yTtIt7M"
+payment_token = '390540012:LIVE:14126'#payment_token = '381764678:TEST:21892'#test
 
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot(token_lay)
 
 
 def commit():
     # os.system('git add *')
     # os.system('git commit -am "update"')
     print('git updated')
-
 
 # commit()
 
@@ -72,20 +73,18 @@ class threader:
 
         msg('Добро пожаловать на курс! 👋🏼\nОн разработан с целью обратить ваше внимание на собственное сознание, '
             'на его содержание, на его работу и природу. Знакомство с внутренним миром не заканчивается никогда и всегда '
-            'актуально.\n\nНаша задача – обратить внимание на самих себя, заметить свои чувства и эмоции, увидеть себя со '
-            'стороны, выстроить крепкую и добрую связь со своим внутренним миром.\n\nУроки жизни – это уроки управления '
-            'собой, и данный курс ставит перед собой цель – сформировать в нас эффективный подход к саморегуляции и '
+            'актуально.\n\nНаша задача — обратить внимание на самих себя, заметить свои чувства и эмоции, увидеть себя со '
+            'стороны, выстроить крепкую и добрую связь со своим внутренним миром.\n\nУроки жизни — это уроки управления '
+            'собой, и и цель данного курса — сформировать в нас эффективный подход к саморегуляции и '
             'самопознанию.')
-        time.sleep(30)
-        doc('о курсе.pdf')
         time.sleep(30)
         msg(
             'Вам будут приходить сообщения-напоминания о необходимости выполнения определенных практик. 💬\n\nКаждый '
             'день у нас будет четыре обязательных упражнения:\n✔️Медитация осознанности, которую я рекомендую '
             'выполнять утром\n✔️Моменты возвращения внимания к настоящему\n✔️Медитация любящей доброты (её буддийское '
-            'название – метта)\n✔️Запись своих мыслей и эмоций уже под вечер\n\nДень лучше начинать с фокусировки и '
+            'название — метта)\n✔️Запись своих мыслей и эмоций уже под вечер\n\nДень лучше начинать с фокусировки и '
             'расслабления – настраиваясь на волну осознанности, а заканчивать с добротой к себе и анализом '
-            'произошедшего, как делали в школе Пифагора.\nПомимо основных трех практик будут дополнительные в течение '
+            'произошедшего, как делали в школе Пифагора.\nПомимо основных трёх практик, будут дополнительные в течение '
             'дня (они не занимают много времени) и упражнения на самопознание ближе к вечеру.\n')
         msg('Предлагаю вам определиться с выбором времени, когда будет комфортно выполнять упражнения\n'
             'Укажите текущее время в вашем регионе, чтобы установить настройки часового пояса. Например, если сейчас '
@@ -112,33 +111,142 @@ class threader:
                     print(e)
                     time.sleep(5)
 
+        msg('Для вас всегда доступно меню с настройками времени и возможностью обратной связи. Знайте, что если у вас '
+            'возникают вопросы, то вы можете их задать и получить ответ. Если выбранное время вам не подойдёт, '
+            'то вы тоже можете изменить его через меню. Просто наберите /start в чате и оно появится.')
+        try:
+            bot.send_photo(user.chat_id, open('как найти меню.JPG', 'rb'))
+        except Exception:
+            doc('как найти меню.JPG')
+
         msg(
-            'Наше первое задание – определиться с тем, насколько мы внимательны в повседневной жизни. ✅\nДавайте '
+            'Наше первое задание — определиться с тем, насколько мы внимательны в повседневной жизни. ✅\nДавайте '
             'ответим на простые вопросы и заодно проанализируем свои привычки. Можете записать свои ответы, '
             'чтобы потом сравнить их с ответами на те же вопросы по окончании курса.\nВозможно, мысль о повторном '
-            'ответе смотивирует сразу определить для себя области, которые нуждаются в изменениях и аспекты, '
-            'в которых мы эти изменения ждём и желаем получить.\n')
-        doc('упр проверка внимания.pdf')
-        time.sleep(180)
+            'ответе смотивирует сразу определить для себя области, которые нуждаются в изменениях и области, '
+            'где мы эти изменения ждём.\n')
+        doc('Упражнение Проверка внимания.pdf')
+        time.sleep(300)
         msg('Сегодня мы будем только знакомиться с курсом и основными понятиями. Сама программа начнётся завтра.')
         msg('🗓Программа курса на первую неделю')
-        doc('1 неделя.pdf')
+        doc('Программа курса на первую неделю.pdf')
         msg('В этом курсе мы будем пользоваться некоторыми понятиями, которые являются якорями и ориентирами в нашей '
             'работе с собственным сознанием и внутренним миром. Рассмотрим их.\n❗️ Основные понятия')
-        doc('основные понятия.pdf')
+        doc('Основные понятия.pdf')
         time.sleep(600)
         msg('Давайте попробуем сделать наше первое упражнение на привнесение внимания в обычное повседневное дело, '
             'стандартная и классическая практика осознанности. ☕️')
-        doc('упр кофейная мед.pdf')
-        time.sleep(120)
+        doc('Упражнение Кофейная медитация.pdf')
+        time.sleep(1200)
         msg('А теперь ещё немного теории. Предлагаю вашему вниманию две небольшие статьи:\n❗️Что такое медитация?\n'
             '❗️Позы для медитации\n')
-        doc('что такое медитация.pdf')
-        doc('позы для медитации.pdf')
+        doc('Что такое медитация.pdf')
+        doc('Позы для медитации.pdf')
         time.sleep(1800)
         msg('И последнее на сегодня очень важное понятие, которым мы будем пользоваться\n❗️Ум новичка')
-        doc('ум новичка.pdf')
+        doc('Ум новичка.pdf')
+        poll = db.get_poll_by_id(0)
+        markup = InlineKeyboardMarkup(True)
+        for i, answer in enumerate(poll.answers.split(sep='\n')):
+            markup.add(InlineKeyboardButton(answer, callback_data='poll {0} {1}'.format(poll.id, i)))
+        bot.send_message(user.chat_id, '*' + poll.question + '*', reply_markup=markup, parse_mode='Markdown')
 
+    def run_before_payment(self):
+        threading.Thread(target=self.before_payment).start()
+
+    def before_payment(self):
+        user = self.user
+        db.add_awaiting_payment(user.chat_id, ' 0')
+        def msg(message, markup=None):
+            bot.send_message(user.chat_id, message, reply_markup=markup)
+            print('sent {0} to {1}'.format(message, user.login))
+
+        def doc(path):
+            for i in range(5):
+                try:
+                    document = open(path, 'rb')
+                    if document is not None:
+                        bot.send_document(user.chat_id, document)
+                    return
+                except Exception as e:
+                    print(e)
+                    time.sleep(5)
+
+        msg('Вы можете ознакомиться с курсом, его содержанием, актуальностью и преимуществами в прикрепленном файле')
+        doc('О курсе.pdf')
+        time.sleep(300)
+        msg(
+            'Оплачивая онлайн-курс, вы соглашаетесь с «Политикой обработки персональных данных и '
+            'конфиденциальности» и условиями «Публичной оферты».')
+        doc('Политика обработки персональных данных и конфиденциальности.pdf')
+        doc('Публичная оферта.pdf')
+        msg('Если вам нужно время, чтобы обдумать или подготовиться, то вы можете оставить бота в чатах Telegram, '
+            'чтобы не потерять, а оплатить и начать обучение позднее.\nНачав, вы будете ежедневно получать материалы '
+            'и упражнения. Вы можете оплатить весь курс целиком за 3000 рублей или оплачивать понедельно, с отрезками '
+            'в одну неделю программы курса, за 500 рублей за неделю.')
+        bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
+                         provider_token=payment_token, currency='RUB', photo_url=None,
+                         need_phone_number=False, need_email=False, is_flexible=False,
+                         prices=[LabeledPrice(label='Полный доступ к боту', amount=300000)], start_parameter='p',
+                         invoice_payload='paid')
+        bot.send_invoice(user.chat_id, title='Оплата доступа к боту.', description='Оплатить курс',
+                         provider_token=payment_token, currency='RUB', photo_url=None,
+                         need_phone_number=False, need_email=False, is_flexible=False,
+                         prices=[LabeledPrice(label='Доступ к первой неделе курса', amount=50000)], start_parameter='p',
+                         invoice_payload='paid')
+
+
+@bot.pre_checkout_query_handler(func=lambda query: True)
+def checkout(query):
+    print('query\n' + str(query))
+    bot.answer_pre_checkout_query(query.id, ok=True)
+
+
+@bot.message_handler(content_types=['successful_payment'])
+def got_payment(message):
+    print('payment\n' + str(message))
+    try:
+        user = db.get_user_by_id(message.chat.id)
+        if message.successful_payment.total_amount == 50000:
+            user.weeks_paid += 1
+        else:
+            user.weeks_paid = 999
+        bot.send_message(149035168, 'Пользователь оплатил бота' + (
+            ' на неделю' if message.successful_payment.total_amount == 50000 else '') + '. id для связи:\n' + str(user.chat_id))  # to Timur
+        bot.send_message(475542187, 'Пользователь оплатил бота' + (
+            ' на неделю' if message.successful_payment.total_amount == 50000 else '') + '. id для связи:\n' + str(user.chat_id))  # to almosh
+
+        db.update_user(user)
+    except Exception:#user does not exist
+        try:
+            new_user = User.User(chat_id=message.chat.id, login=str(message.chat.username) + ' ' + str(message.chat.first_name), start=dt.datetime.utcnow())
+            if message.successful_payment.total_amount == 50000:
+                new_user.weeks_paid += 1
+            else:
+                new_user.weeks_paid = 999
+            db.add_allowed_login(new_user.chat_id)
+
+            bot.send_message(149035168, 'Новый пользователь оплатил бота' + (' на неделю' if message.successful_payment.total_amount == 500 else '') + '. id для связи:\n' + str(new_user.chat_id))#to Timur
+            bot.send_message(475542187, 'Новый пользователь оплатил бота' + (' на неделю' if message.successful_payment.total_amount == 500 else '') + '. id для связи:\n' + str(new_user.chat_id))#to almosh
+            db.add_user(new_user)
+            db.delete_awaiting_payment(new_user.chat_id)
+            t = threader(new_user)
+            t.run_welcome()
+            print(new_user.login + ' paid successfully')
+        except Exception as e:
+            print(str(e) + '\nwhile adding user')
+
+
+#if not db.is_allowed_login(1071137785):
+#   new_user = User.User(chat_id=1071137785,login='Mila Z',
+#                       start=dt.datetime.utcnow())
+    #new_user.weeks_paid += 1
+    #db.add_allowed_login(new_user.chat_id)
+    #db.add_user(new_user)
+    #t = threader(new_user)
+    #t.run_welcome()
+    #bot.send_message(149035168, 'Новый пользователь оплатил бота. id для связи:\n1071137785')  # to Timur
+    #bot.send_message(475542187, 'Mila Z added')#to me
 
 @bot.callback_query_handler(lambda query: query.data == 'done')
 def process_callback_1(query):
@@ -152,6 +260,30 @@ def process_callback_1(query):
             bot.send_message(query.message.chat.id, 'Отправьте свой отчет в чат.')
         else:
             bot.send_message(query.message.chat.id, 'Самоотчет выполняется только раз в день.')
+    except Exception as e:
+        print(e)
+
+
+@bot.callback_query_handler(lambda query: 'pick event' in query.data)
+def process_callback_1(query):
+    print(str(query))
+    # bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
+    try:
+        user = db.get_user_by_id(query.message.chat.id)
+        inline = types.InlineKeyboardMarkup(True)
+        events_picked = list(user.events_picked)
+        num = int(query.data.split()[2])
+        for i in range(3):
+            if(i == num):
+                print(int(events_picked[i]))
+                events_picked[i] = str((int(events_picked[i]) + 1) % 2)
+            inline.add(InlineKeyboardButton(str(i + 1) + ('-е сообщение ✅' if events_picked[i] == '1' else '-е сообщение ❌'),
+                                            callback_data='pick event ' + str(i)))
+        bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id,
+                                      reply_markup=inline)
+        user.events_picked = ''.join(events_picked)
+        db.update_user(user)
+
     except Exception as e:
         print(e)
 
@@ -195,20 +327,27 @@ def process_callback_1(query):
         print(e)
 
 
+@bot.callback_query_handler(lambda query: 'remind' in query.data)
+def process_callback_1(query):
+    try:
+        bot.edit_message_reply_markup(chat_id=query.message.chat.id, message_id=query.message.message_id)  # removes markup
+        db.add_awaiting_payment(query.message.chat.id, ' 1')
+    except Exception as e:
+        print(e)
+
+
 @bot.message_handler(commands=['help', 'start'])
 def start_message(message):
     text = message.text
     id_ = message.chat.id
     name = message.chat.first_name
     login = message.chat.username
+    print(message)
 
     def msg(message, markup=None):
         bot.send_message(id_, message, reply_markup=markup)
         print('sent {0} to {1}'.format(message, name))
 
-    # inline_btn_1 = InlineKeyboardButton('Первая Кнопки!', callback_data='sdss')
-    # inline_kb1 = InlineKeyboardMarkup(True).add(inline_btn_1)
-    # msg("Первая инлайн Кнопки", inline_kb1)
 
     # def remove_markup():
     #    t = bot.send_message(id_, 'text', reply_markup=types.ReplyKeyboardHide())
@@ -223,21 +362,23 @@ def start_message(message):
 
     # remove_markup()
     markup = types.ReplyKeyboardMarkup(True, True)
-    markup.row('Настройки', 'Обратная связь', 'FAQ')
-    resp = 'Вы успешно вошли в главное меню.\nНажмите Настройки для просмотра/изменения часового пояса и времени ' \
-           'ежедневных напоминаний.\nНажмите Обратная связь для общения с администрацией.\nНажмите FAQ для просмотра ' \
-           'ответов на часто задаваемые вопросы.\n '
+    markup.row('Настройки', 'Обратная связь', 'Начать заново')
+    resp = 'Вы вошли в меню\n\nНажмите «Настройки», чтобы посмотреть или изменить время ежедневных напоминаний и ' \
+           'часового пояса.\n\nНажмите «Обратная связь», чтобы написать нам.\n\nНажмите «Начать заново», если хотите, ' \
+           'чтобы курс запустился с самого начала. '
 
-    # if not db.is_allowed_login(login):
-
-    #    return
-    # TODO payment
+    if not db.is_allowed_login(str(id_)):
+        new_user = User.User(chat_id=id_, login=login)
+        t = threader(new_user)
+        t.run_before_payment()
+        return
 
     if db.get_user_by_id(id_) is None:
-        new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
-        db.add_user(new_user)
-        t = threader(new_user)
-        t.run_welcome()
+        #new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
+        #db.add_user(new_user)
+        #t = threader(new_user)
+        #t.run_before_payment()
+        msg('Произошла неизвестная ошибка. Сообщите о ней @almosh822')
         return
 
     user = db.get_user_by_id(id_)
@@ -274,9 +415,8 @@ def send_text(message):
     id_ = message.chat.id
     name = message.chat.first_name
     login = message.chat.username
-    if text == 'db' and login == 'almosh822':
-        bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'))
-        bot.send_message(db.get_user_by_login('almosh822').chat_id, '*bald text*', parse_mode='Markdown')
+    if text == 'db' and id_ == 475542187:
+        bot.send_document(475542187, open('db.db', 'rb'))
     document = ''
     nums = [int(s) for s in text.split() if s.isdigit()] if text is not None else None
     if message.document is not None:
@@ -320,18 +460,18 @@ def send_text(message):
                 except Exception as e:
                     bot.send_document(id_, document)
 
-    # TODO payments
-    # if not db.is_allowed_login(login):
-    #    msg("У Вас нет доступа к этому чату.")
-    #    return
-
-    # register new user
-    if db.get_user_by_id(id_) is None:
-        # if db.get_user_by_login(login) is None:
+    if not db.is_allowed_login(str(id_)):
         new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
-        db.add_user(new_user)
         t = threader(new_user)
-        t.run_welcome()
+        t.run_before_payment()
+        return
+
+    if db.get_user_by_id(id_) is None:
+        # new_user = User.User(chat_id=id_, login=login, start=dt.datetime.utcnow())
+        # db.add_user(new_user)
+        # t = threader(new_user)
+        # t.run_before_payment()
+        msg('Произошла неизвестная ошибка. Сообщите о ней @almosh822')
         return
 
     user = db.get_user_by_id(id_)
@@ -343,6 +483,7 @@ def send_text(message):
     try:
         if db.is_admin(user):
             # add not
+
             if user.stage == 1:
                 if text == 'Настраиваемое напоминание':
                     msg('Введите день, в который придет напоминание, его порядковый номер, '
@@ -518,7 +659,7 @@ def send_text(message):
                     user = db.get_user_by_id(txt[0])
                     for i in range(2, len(txt)):
                         txt[1] += '\n' + txt[i]
-                        bot.send_message(user.chat_id, txt[1])
+                    bot.send_message(user.chat_id, txt[1])
                     if document is not None and document != '':
                         bot.send_document(user.chat_id, document)
                     msg('Сообщение отправлено. Продолжайте отвечать пользователям, либо введите /start, чтобы '
@@ -708,30 +849,33 @@ def send_text(message):
                 hours = int(text)
                 if 0 <= hours < 24:
                     user.time_diff = int(time_diff(hours, timing.gmtime().tm_hour))
-                    user.next_stage()
-                    db.update_user(user)
                     msg('Ваш часовой пояс GMT+{0} успешно установлен. Вы можете изменить его в настройках.'.format(
                         str(user.time_diff)))
                     if user.stage == 3:
                         user.stage = 2
                         db.update_user(user)
                         return
-                    msg('Теперь укажите, в какое время вы хотите получать ежедневные напоминания о выполнении трех '
-                        'основных упражнений.\nВведите время в формате чч мм 3 раза одним сообщением.\nНапример: 7 00\n19 '
-                        '00\n22 00')
+                    user.next_stage()
+                    now = dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff)
+                    user.start = now.replace(hour=0, minute=0, microsecond=0)
+                    db.update_user(user)
+                    msg('Теперь укажите, в какое время вы хотите получать ежедневные напоминания о выполнении трёх '
+                        'основных упражнений.\nВведите время в формате чч мм 3 раза одним сообщением.\nНапример: 7 00\n13 '
+                        '00\n00 00')
                     return
                 raise ValueError
             except Exception as e:
                 print(str(e))
                 msg("Неверный формат. Введите число от 0 до 23. Например, если сейчас 12:10, напишите 12 в чат.\n"
                     "Если хотите отменить регистрацию, введите /start")
+                return
         # 2 этап - установка времени напоминаний
         elif user.stage in [1, 4]:
             times = []
-            strings = text.replace(':', ' ').replace('.', ' ').replace(',', ' ').split()
+            strings = text.replace(':', ' ').replace('.', ' ').replace(',', ' ').replace('-', ' ').split()
             if len(strings) != 6:
                 msg('Неверный формат. Введите время в формате чч мм 3 раза одним сообщением.\n'
-                    'Например: 7 00\n19 00\n22 00\nЕсли хотите отменить настройку времени, введите /start')
+                    'Например: 7 00\n13 00\n00 00\nЕсли хотите отменить настройку времени, введите /start')
                 return
 
             for i, value in enumerate(strings):
@@ -775,8 +919,12 @@ def send_text(message):
             new_message = Chat.Message(name + ' ' + str(id_), text, document)
             new_message.datetime = dt.datetime.utcnow().replace(microsecond=0)
             db.add_message(new_message)
-            msg('Сообщение отправлено. Ожидайте ответа. Вы можете написать еще одно, либо выйти в главное меню, '
-                'нажав /start')
+            bot.send_message(149035168, 'Получено новое сообщение от пользователя.')
+            bot.send_message(475542187, name + ' в ' + str(new_message.datetime) +
+                             ' написал\n' + text)
+            msg('Сообщение отправлено. Ожидайте ответа. Спасибо за Ваше обращение!')
+            user.stage = 2
+            db.update_user(user)
             return
 
         # report
@@ -799,6 +947,12 @@ def send_text(message):
                         f = open('puzzles/{0}.jpg'.format(day // 7), 'rb')
                         doc(f)
             return
+        elif user.stage == 7 and text == 'Да':
+            user.start = (dt.datetime.utcnow() + dt.timedelta(hours=user.time_diff) - dt.timedelta(days=1)).replace(hour=0, minute=0, microsecond=0)
+            user.stage = 2
+            db.update_user(user)
+            msg('Вы снова начнёте получать сообщения с упражнениями.')
+            return
 
         if text == 'Настройки':
             markup = types.ReplyKeyboardMarkup(True, True)
@@ -812,6 +966,13 @@ def send_text(message):
                 'Часовой пояс GMT+{0}\n'
                 'Ежедневные напоминания приходят в\n{1}'
                 'Хотите что-то изменить? Для выхода в главное меню введите /start'.format(user.time_diff, resp), markup)
+            inline = types.InlineKeyboardMarkup(True)
+            events_picked = user.events_picked
+            for i in range(3):
+                inline.add(InlineKeyboardButton(str(i + 1) + ('-е сообщение ✅' if events_picked[i] == '1' else '-е сообщение ❌'), callback_data='pick event ' + str(i)))
+            msg('Используя кнопки, вы можете «отключить» одно или несколько сообщений, отправляемых в выбранное Вами '
+                'время.', inline)
+            return
 
         if text == 'Изменить часовой пояс':
             user.stage = 3
@@ -821,19 +982,23 @@ def send_text(message):
 
         if text == 'Изменить время ежедневных напоминаний':
             user.stage = 4
-            msg('Укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\n'
-                'Введите время в формате чч мм 3 раза одним сообщением.')
+            msg('Укажите, в какое время вы хотите получать ежедневные напоминания о выполнении упражнений.\nВведите '
+                'время в формате чч мм 3 раза одним сообщением.\nНапример: 7 00\n13 00\n00 00')
             db.update_user(user)
             return
 
         if text == 'Обратная связь':
             user.stage = 5
-            msg('Введите свое сообщение. Администрация прочитает его и ответит как можно быстрее.')
+            msg('Введите своё сообщение.')
             db.update_user(user)
             return
 
-        if text == 'FAQ':
-            msg('Тут будет FAQ\nНажмите /start для выхода в главное меню.')
+        if text == 'Начать заново':
+            user.stage = 7
+            markup = types.ReplyKeyboardMarkup(True, True)
+            markup.row('Да')
+            msg('Вы точно хотите начать заново? Это действие нельзя будет отменить.', markup)
+            db.update_user(user)
             return
     except Exception as e:
         msg('Что-то пошло не так. Попробуйте еще раз или нажмите /start для выхода в главное меню.')
@@ -846,7 +1011,7 @@ def send_text(message):
 def backup():
     for i in range(6):
         try:
-            bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'))
+            bot.send_document(475542187, open('db.db', 'rb'))
             break
         except Exception as e:
             print(e)
@@ -855,6 +1020,11 @@ def backup():
 
 schedule.every(1).hours.do(backup)
 
+def bot3():
+    os.system('python tele-bot3.py')
+
+threading.Thread(target=bot3).start()#start new bot
+bot.send_message(475542187, 'bot restarted')#to almosh
 
 def sp():
     while True:
@@ -870,9 +1040,9 @@ def polling():  # Don't let the main Thread end.
         bot.polling()
     except Exception as e:
         print(e)
-        bot.send_document(db.get_user_by_login('almosh822').chat_id, open('db.db', 'rb'), caption=str(e))
+        bot.send_document(475542187, open('db.db', 'rb'), caption=str(e))
         time.sleep(5)
 
 
-while True:
+for i in range(111):
     polling()
